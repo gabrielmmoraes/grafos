@@ -5,9 +5,11 @@
 #include "dfs.h"
 
 int main(){
+    unsigned int i;
     unsigned int n_vertices;
     unsigned int arestas = 0;
     int aresta1, aresta2;
+    unsigned short componentes_conexas = 1;
 
     fscanf(stdin, "%d", &n_vertices);
 
@@ -23,15 +25,20 @@ int main(){
         arestas++;
     }
 
-    for(uint8_t i = 0; i < n_vertices; i++){
-        if(!visitados[i]) dfs(n_vertices, i, grafo, visitados, graus);
+    dfs(n_vertices, 0, grafo, visitados, graus);
+
+    for(i = 0; i < n_vertices; i++){
+        if(!visitados[i]){
+            componentes_conexas++;
+            dfs(n_vertices, i, grafo, visitados, graus);
+        }
     }
 
     unsigned int max = 0;
     unsigned int min = n_vertices;
     double med = 0;
 
-    for(uint8_t i = 0; i < n_vertices; i++){
+    for(i = 0; i < n_vertices; i++){
         //printf("Grau do vértice %d: %d\n", i+1, graus[i]);
         med += graus[i];
         if(graus[i] > max)  max = graus[i];
@@ -40,5 +47,5 @@ int main(){
 
     med /= n_vertices;
 
-    printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tGrau mínimo: %u\n\tGrau máximo: %u\n\tGrau médio: %.2lf\n", n_vertices, arestas, min, max, med);
+    printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tComponentes Conexas: %d\n\tGrau mínimo: %u\n\tGrau máximo: %u\n\tGrau médio: %.2lf\n", n_vertices, arestas, componentes_conexas, min, max, med);
 }
