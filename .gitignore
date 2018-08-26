@@ -1,3 +1,6 @@
 .vscode/*
 lista[0-9]/
 *.txt
+*.swo
+*.swp
+*.sh
