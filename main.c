@@ -11,8 +11,14 @@ int main(){
     int aresta1, aresta2;
     unsigned short componentes_conexas = 1;
 
+    // Lendo número de vértices do stdin
     fscanf(stdin, "%d", &n_vertices);
 
+    /* 
+     *  Com o número de vértices podemos criar as estruturas de dados
+     *  para representarmos o grafo (todas inicializadas com 0)
+     */
+    
     uint8_t* visitados  = (uint8_t*)        calloc(n_vertices, 1);
     
     uint8_t (*grafo)[n_vertices];
@@ -20,20 +26,28 @@ int main(){
     
     unsigned int* graus = (unsigned int*)   calloc(n_vertices, 4);
 
+    // Para cada linha diferente de EOF impressa é registrada uma aresta
     while(fscanf(stdin, "%d %d", &aresta1, &aresta2) != EOF){
         grafo[aresta1-1][aresta2-1] = grafo[aresta2-1][aresta1-1] = 1;
         arestas++;
     }
 
+    // Chamando DFS no vértice de menor index
     dfs(n_vertices, 0, grafo, visitados, graus);
 
+    /*  
+     *  No caso de algum vértice não ser marcado na primeira executação
+     *  temos uma componente conexa a mais no grafo
+     */ 
     for(i = 0; i < n_vertices; i++){
         if(!visitados[i]){
+            // Incrementando variável de componentes conexas e executando DFS no vértice
             componentes_conexas++;
             dfs(n_vertices, i, grafo, visitados, graus);
         }
     }
 
+    // Checando graus máximo e mínimo, além do grau médio do grafo
     unsigned int max = 0;
     unsigned int min = n_vertices;
     double med = 0;
@@ -47,5 +61,6 @@ int main(){
 
     med /= n_vertices;
 
+    // Apresentação dos resultados
     printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tComponentes Conexas: %d\n\tGrau mínimo: %u\n\tGrau máximo: %u\n\tGrau médio: %.2lf\n", n_vertices, arestas, componentes_conexas, min, max, med);
 }

@@ -4,14 +4,14 @@
 //unsigned int n_visitados = 0;
 
 void dfs(unsigned int size, unsigned int raiz, uint8_t grafo[size][size], uint8_t visitados[], unsigned int graus[]){
-    //printf("Entrando em %d:\n", raiz+1);
-    //n_visitados++;
+    // Marcando vértice como visitado
     visitados[raiz] = 1;
     for (unsigned int i = 0; i < size; i++){
-        //printf("Checando %d\t%d, visitados %d\n", raiz+1, i+1, n_visitados);
+        // Checando vizinhos do vértice
         if(grafo[raiz][i]){
+            // Ao achar um vizinho, aumenta o grau do vértice raiz
             graus[raiz]++;
-            //printf("Aresta entre %d e %d, grau de %d agora é %d\n", raiz+1, i+1, raiz+1, graus[raiz]);
+            // Caso o vértice encontrado não foi visitado, executamos dfs nele
             if(!visitados[i]) dfs(size, i, grafo, visitados, graus);
         }
     }
