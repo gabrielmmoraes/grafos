@@ -8,23 +8,26 @@ using namespace std;
 
 class Vertice{
     public:
-        Vertice(unsigned int indice);
+        Vertice(int i);
         
         int getIndice();
+        int getGrau();
         int getPai();
         int getNivel();
 
+        void incrementaGrau();
         void setPai(int v);
         void setNivel(int n);
     protected:
     private:
         int indice;
+        int grau;
         int descoberto;
         int explorado;
         int pai;
         int nivel;
         
-}
+};
 
 class Aresta{
     public:
@@ -32,14 +35,13 @@ class Aresta{
         Vertice getVertice(int v);
     protected:
     private:
-        Vertice v1;
-        Vertice v2;
-}
+        Vertice v[2];
+};
 
 class MatrizAdjacencias{
     public:
-        MatrizAdjacencias();
-        MatrizAdjacencias(ofstream *input);
+        MatrizAdjacencias(int n);
+        MatrizAdjacencias(ifstream *input);
 
         void setAdjacencia(int v1, int v2);
 
@@ -50,14 +52,16 @@ class MatrizAdjacencias{
 
     protected:
     private:
-        int *vertices;
-        int **adjacencias;
-}
+        int n_vertices;
+        int n_arestas;
+        Vertice vertices[n_vertices];
+        int adjacencias[n_vertices][n_vertices];
+};
 
 class ListaAdjacencias{
     public:
-        ListaAdjacencias();
-        ListaAdjacencias(ofstream *input);
+        ListaAdjacencias(int n);
+        ListaAdjacencias(ifstream *input);
 
         void setAdjacencia(int v1, int v2);
 
@@ -67,8 +71,10 @@ class ListaAdjacencias{
         void componentesConexos();
     protected:
     private:
-        int *vertices;
-        list<Vertice> *adjacencias;
-}
+        int n_vertices;
+        int n_arestas;
+        Vertice vertices[n_vertices];
+        list<int> adjacencias[n_vertices];
+};
 
 #endif //GRAFO_H
