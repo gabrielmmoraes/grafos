@@ -9,23 +9,18 @@ class Vertice{
         int getGrau();
         int getPai();
         int getNivel();
-        int getDescoberto();
-        int getExplorado();
+        int getMarcacao();
 
         void incrementaGrau();
         void setPai(int v);
         void setNivel(int n);
         void desmarca();
-        void descobre();
-        void descobre(int i);
-        void explora();
-        void explora(int i);
+        void marca(int i=1);
     protected:
     private:
         int indice;
         int grau;
-        int descoberto;
-        int explorado;
+        int marcacao;
         int pai;
         int nivel;
         
