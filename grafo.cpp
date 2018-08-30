@@ -4,10 +4,11 @@
 #include <stack>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>>
 
 using namespace std;
 
-Vertice::Vertice(int i){
+Vertice::Vertice(unsigned long i){
     indice = i;
     grau = 0;
     marcacao = 0;
@@ -15,23 +16,23 @@ Vertice::Vertice(int i){
     nivel = -1;
 }
 
-int Vertice::getIndice(){
+unsigned long Vertice::getIndice(){
     return indice;
 }
 
-int Vertice::getGrau(){
+unsigned long Vertice::getGrau(){
     return grau;
 }
 
-int Vertice::getPai(){
+unsigned long Vertice::getPai(){
     return pai;
 }
 
-int Vertice::getNivel(){
+unsigned long Vertice::getNivel(){
     return nivel;
 }
 
-int Vertice::getMarcacao(){
+uint8_t Vertice::getMarcacao(){
     return marcacao;
 }
 
@@ -54,27 +55,28 @@ void Vertice::desmarca(){
 }
 
 void Vertice::marca(int i){
-    marcacao = i;
+    marcacao = 1;
+    // marcacao = i;
 }
 
-Aresta::Aresta(int v1, int v2){
+Aresta::Aresta(unsigned long v1, unsigned long v2){
     v[0] = new Vertice(v1);
     v[1] = new Vertice(v2);
 }
 
-Vertice* Aresta::getVertice(int v){
+Vertice* Aresta::getVertice(unsigned long v){
     return this->v[v-1];
 }
 
-MatrizAdjacencias::MatrizAdjacencias(int n){
+MatrizAdjacencias::MatrizAdjacencias(unsigned long n){
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
-    for(int i=0;i<n_vertices;i++){
+    adjacencias = (unsigned long**) malloc(sizeof(unsigned long*)*n_vertices);
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
-        for(int j=0;j<n_vertices;j++){
+        adjacencias[i] = (unsigned long*) malloc(sizeof(unsigned long)*n_vertices);
+        for(unsigned long j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
         }
     }
@@ -84,22 +86,22 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input){
     fscanf(input, "%d", &n_vertices);
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
-    for(int i=0;i<n_vertices;i++){
+    adjacencias = (unsigned long**) malloc(sizeof(unsigned long*)*n_vertices);
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
-        for(int j=0;j<n_vertices;j++){
+        adjacencias[i] = (unsigned long*) malloc(sizeof(unsigned long)*n_vertices);
+        for(unsigned long j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
         }
     }
     
-    int v1, v2;
+    unsigned long v1, v2;
     while(fscanf(input, "%d %d", &v1, &v2) != EOF){
         setAdjacencia(v1,v2);
     }
 }
 
-void MatrizAdjacencias::setAdjacencia(int v1, int v2){
+void MatrizAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
     adjacencias[v1-1][v2-1] = 1;
     adjacencias[v2-1][v1-1] = 1;
     vertices[v1-1]->incrementaGrau();
@@ -107,20 +109,22 @@ void MatrizAdjacencias::setAdjacencia(int v1, int v2){
     n_arestas++;
 }
 
-void MatrizAdjacencias::BFS(int origem){
-    for(int i=0;i<n_vertices;i++){
+void MatrizAdjacencias::BFS(unsigned long origem){
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    queue<int> Q;
-    int nivel;
+    queue<unsigned long> Q;
+    unsigned long nivel;
     vertices[origem-1]->marca();
     Q.push(origem-1);
     vertices[origem-1]->setNivel(0);
     vertices[origem-1]->setPai(0);
+    unsigned long v;
+    unsigned long i;
     while(!Q.empty()){
-        int v = Q.front();
+        v = Q.front();
         Q.pop();
-        for(int i=0;i<n_vertices;i++){
+        for(i=0;i<n_vertices;i++){
             if(adjacencias[v][i]){
                 if(vertices[i]->getMarcacao() == 0){
                     vertices[i]->marca();
@@ -133,18 +137,20 @@ void MatrizAdjacencias::BFS(int origem){
         }
     } 
 }
-void MatrizAdjacencias::DFS(int origem){
-    for(int i=0;i<n_vertices;i++){
+void MatrizAdjacencias::DFS(unsigned long origem){
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    stack<int> S;
+    stack<unsigned long> S;
     S.push(origem-1);
+    unsigned long v;
+    unsigned long i;
     while(!S.empty()){
-        int v = S.top();
+        v = S.top();
         S.pop();
         if(vertices[v]->getMarcacao()==0){
             vertices[v]->marca();
-            for(int i=n_vertices-1;i>=0;i--){
+            for(i=n_vertices-1;i>=0;i--){
                 if(adjacencias[v][i]){
                     S.push(i);
                 }
@@ -156,14 +162,14 @@ void MatrizAdjacencias::DFS(int origem){
 void MatrizAdjacencias::componentesConexos(){}
 
 
-ListaAdjacencias::ListaAdjacencias(int n){
+ListaAdjacencias::ListaAdjacencias(unsigned long  n){
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
-    for(int i=0;i<n_vertices;i++){
+    adjacencias = (list<unsigned long>**) malloc(sizeof(list<unsigned long>*)*n_vertices);
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = new list<int>;
+        adjacencias[i] = new list<unsigned long>;
     }
 }
 
@@ -171,20 +177,20 @@ ListaAdjacencias::ListaAdjacencias(FILE *input){
     fscanf(input, "%d", &n_vertices);
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
-    for(int i=0;i<n_vertices;i++){
+    adjacencias = (list<unsigned long>**) malloc(sizeof(list<unsigned long>*)*n_vertices);
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = new list<int>;
+        adjacencias[i] = new list<unsigned long>;
     }
 
-    int v1, v2;
+    unsigned long v1, v2;
     while(fscanf(input, "%d %d", &v1, &v2) != EOF){
         setAdjacencia(v1,v2);
     }
 
 }
 
-void ListaAdjacencias::setAdjacencia(int v1, int v2){
+void ListaAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
     adjacencias[v1-1]->push_back(v2-1);
     adjacencias[v2-1]->push_back(v1-1);
     vertices[v1-1]->incrementaGrau();
@@ -192,13 +198,13 @@ void ListaAdjacencias::setAdjacencia(int v1, int v2){
     n_arestas++;
 }
 
-void ListaAdjacencias::BFS(int origem){
-    int v;
-    for(int i=0;i<n_vertices;i++){
+void ListaAdjacencias::BFS(unsigned long origem){
+    unsigned long v;
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    queue<int> Q;
-    int nivel;
+    queue<unsigned long> Q;
+    unsigned long nivel;
     vertices[origem-1]->marca();
     Q.push(origem-1);
     vertices[origem-1]->setNivel(0);
@@ -206,8 +212,8 @@ void ListaAdjacencias::BFS(int origem){
     while(!Q.empty()){
         v = Q.front();
         Q.pop();
-        list<int>::iterator w;
-        list<int> *vizinhos = adjacencias[v];
+        list<unsigned long>::iterator w;
+        list<unsigned long> *vizinhos = adjacencias[v];
         for(w = vizinhos->begin();w!= vizinhos->end();w++){
             if(vertices[*w]->getMarcacao()==0){
                 vertices[*w]->marca();
@@ -220,19 +226,20 @@ void ListaAdjacencias::BFS(int origem){
     }
 }
 
-void ListaAdjacencias::DFS(int origem){
-    for(int i=0;i<n_vertices;i++){
+void ListaAdjacencias::DFS(unsigned long origem){
+    for(unsigned long i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    stack<int> S;
+    stack<unsigned long> S;
     S.push(origem-1);
+    unsigned long v;
     while(!S.empty()){
-        int v = S.top();
+        S.top();
         S.pop();
         if(vertices[v]->getMarcacao()==0){
             vertices[v]->marca();
-            list<int>::iterator w;
-            list<int> *vizinhos = adjacencias[v];
+            list<unsigned long>::iterator w;
+            list<unsigned long> *vizinhos = adjacencias[v];
             for(w = vizinhos->begin();w!=vizinhos->end();w++){
                 S.push(*w);
             }
