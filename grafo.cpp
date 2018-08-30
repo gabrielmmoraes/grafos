@@ -10,8 +10,7 @@ using namespace std;
 Vertice::Vertice(int i){
     indice = i;
     grau = 0;
-    descoberto = 0;
-    explorado = 0;
+    marcacao = 0;
     pai = -1;
     nivel = -1;
 }
@@ -32,12 +31,8 @@ int Vertice::getNivel(){
     return nivel;
 }
 
-int Vertice::getDescoberto(){
-    return descoberto;
-}
-
-int Vertice::getExplorado(){
-    return explorado;
+int Vertice::getMarcacao(){
+    return marcacao;
 }
 
 void Vertice::incrementaGrau(){
@@ -53,24 +48,13 @@ void Vertice::setNivel(int n){
 }
 
 void Vertice::desmarca(){
-    descoberto = 0;
-    explorado = 0;
+    marcacao = 0;
+    pai = -1;
+    nivel = -1;
 }
 
-void Vertice::descobre(){
-    descoberto = 1;
-}
-
-void Vertice::descobre(int i){
-    descoberto = i;
-}
-
-void Vertice::explora(){
-    explorado = 1;
-}
-
-void Vertice::explora(int i){
-    explorado = i;
+void Vertice::marca(int i){
+    marcacao = i;
 }
 
 Aresta::Aresta(int v1, int v2){
@@ -129,7 +113,7 @@ void MatrizAdjacencias::BFS(int origem){
     }
     queue<int> Q;
     int nivel;
-    vertices[origem-1]->descobre();
+    vertices[origem-1]->marca();
     Q.push(origem-1);
     vertices[origem-1]->setNivel(0);
     vertices[origem-1]->setPai(0);
@@ -138,18 +122,36 @@ void MatrizAdjacencias::BFS(int origem){
         Q.pop();
         for(int i=0;i<n_vertices;i++){
             if(adjacencias[v][i]){
-                if(vertices[i]->getDescoberto() == 0){
-                    vertices[i]->descobre();
+                if(vertices[i]->getMarcacao() == 0){
+                    vertices[i]->marca();
                     nivel = vertices[v]->getNivel()+1;
                     vertices[i]->setNivel(nivel);
-                    vertices[i]->setPai(v);
+                    vertices[i]->setPai(v+1);
                     Q.push(i);
                 }
             }
         }
     } 
 }
-void MatrizAdjacencias::DFS(int origem){}
+void MatrizAdjacencias::DFS(int origem){
+    for(int i=0;i<n_vertices;i++){
+        vertices[i]->desmarca();
+    }
+    stack<int> S;
+    S.push(origem-1);
+    while(!S.empty()){
+        int v = S.top();
+        S.pop();
+        if(vertices[v]->getMarcacao()==0){
+            vertices[v]->marca();
+            for(int i=n_vertices-1;i>=0;i--){
+                if(adjacencias[v][i]){
+                    S.push(i);
+                }
+            }
+        }
+    }
+}
 
 void MatrizAdjacencias::componentesConexos(){}
 
@@ -183,14 +185,59 @@ ListaAdjacencias::ListaAdjacencias(FILE *input){
 }
 
 void ListaAdjacencias::setAdjacencia(int v1, int v2){
-    adjacencias[v1-1]->emplace_back(v2-1);
-    adjacencias[v2-1]->emplace_back(v1-1);
+    adjacencias[v1-1]->push_back(v2-1);
+    adjacencias[v2-1]->push_back(v1-1);
     vertices[v1-1]->incrementaGrau();
     vertices[v2-1]->incrementaGrau();
     n_arestas++;
 }
 
-void ListaAdjacencias::BFS(int origem){}
-void ListaAdjacencias::DFS(int origem){}
+void ListaAdjacencias::BFS(int origem){
+    int v;
+    for(int i=0;i<n_vertices;i++){
+        vertices[i]->desmarca();
+    }
+    queue<int> Q;
+    int nivel;
+    vertices[origem-1]->marca();
+    Q.push(origem-1);
+    vertices[origem-1]->setNivel(0);
+    vertices[origem-1]->setPai(0);
+    while(!Q.empty()){
+        v = Q.front();
+        Q.pop();
+        list<int>::iterator w;
+        list<int> *vizinhos = adjacencias[v];
+        for(w = vizinhos->begin();w!= vizinhos->end();w++){
+            if(vertices[*w]->getMarcacao()==0){
+                vertices[*w]->marca();
+                nivel = vertices[v]->getNivel()+1;
+                vertices[*w]->setNivel(nivel);
+                vertices[*w]->setPai(v+1);
+                Q.push(*w);
+            }
+        }
+    }
+}
+
+void ListaAdjacencias::DFS(int origem){
+    for(int i=0;i<n_vertices;i++){
+        vertices[i]->desmarca();
+    }
+    stack<int> S;
+    S.push(origem-1);
+    while(!S.empty()){
+        int v = S.top();
+        S.pop();
+        if(vertices[v]->getMarcacao()==0){
+            vertices[v]->marca();
+            list<int>::iterator w;
+            list<int> *vizinhos = adjacencias[v];
+            for(w = vizinhos->begin();w!=vizinhos->end();w++){
+                S.push(*w);
+            }
+        }
+    }
+}
 
 void ListaAdjacencias::componentesConexos(){}   
