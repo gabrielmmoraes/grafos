@@ -1,11 +1,28 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
+#include <iostream>
+#include <list>
+
+using namespace std;
+
+// Definindo Tupla para marcação de vértice pai
+  typedef struct Tupla{
+     int vertice;
+     int pai;
+  } Tupla;
+
+typedef struct Lista{
+    int indice;
+    Lista* prox;
+    Lista* anterior;
+} Lista;
+
 class Vertice{
     public:
-        Vertice(int i);
+        Vertice();
+        ~Vertice();
         
-        int getIndice();
         int getGrau();
         int getPai();
         int getNivel();
@@ -18,7 +35,6 @@ class Vertice{
         void marca(int i=1);
     protected:
     private:
-        int indice;
         int grau;
         int marcacao;
         int pai;
@@ -29,6 +45,7 @@ class Vertice{
 class Aresta{
     public:
         Aresta(int v1, int v2);
+        ~Aresta();
         Vertice* getVertice(int v);
     protected:
     private:
@@ -38,7 +55,11 @@ class Aresta{
 class MatrizAdjacencias{
     public:
         MatrizAdjacencias(int n);
-        MatrizAdjacencias(FILE *input);
+        ~MatrizAdjacencias();
+        MatrizAdjacencias(FILE* input);
+
+        int getNVertices();
+        int getNArestas();
 
         void setAdjacencia(int v1, int v2);
 
@@ -47,18 +68,22 @@ class MatrizAdjacencias{
 
         void componentesConexos();
 
+        Vertice **vertices;
     protected:
     private:
         int n_vertices;
         int n_arestas;
-        Vertice **vertices;
         int **adjacencias;
 };
 
 class ListaAdjacencias{
     public:
         ListaAdjacencias(int n);
+        ~ListaAdjacencias();
         ListaAdjacencias(FILE *input);
+
+        int getNVertices();
+        int getNArestas();
 
         void setAdjacencia(int v1, int v2);
 
@@ -66,11 +91,12 @@ class ListaAdjacencias{
         void DFS(int origem);
 
         void componentesConexos();
+        
+        Vertice **vertices;
     protected:
     private:
         int n_vertices;
         int n_arestas;
-        Vertice **vertices;
         list<int> **adjacencias;
 };
 

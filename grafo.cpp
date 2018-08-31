@@ -4,20 +4,17 @@
 #include <stack>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>>
 
 using namespace std;
 
-Vertice::Vertice(int i){
-    indice = i;
+Vertice::Vertice(){
     grau = 0;
     marcacao = 0;
-    pai = -1;
+    pai = -2;
     nivel = -1;
 }
 
-int Vertice::getIndice(){
-    return indice;
+Vertice::~Vertice(){
 }
 
 int Vertice::getGrau(){
@@ -50,18 +47,21 @@ void Vertice::setNivel(int n){
 
 void Vertice::desmarca(){
     marcacao = 0;
-    pai = -1;
+    pai = -2;
     nivel = -1;
 }
 
 void Vertice::marca(int i){
-    marcacao = 1;
-    // marcacao = i;
+    marcacao = i;
 }
 
 Aresta::Aresta(int v1, int v2){
-    v[0] = new Vertice(v1);
-    v[1] = new Vertice(v2);
+    v[0] = new Vertice();
+    v[1] = new Vertice();
+}
+
+Aresta::~Aresta(){
+		free(v);
 }
 
 Vertice* Aresta::getVertice(int v){
@@ -74,7 +74,7 @@ MatrizAdjacencias::MatrizAdjacencias(int n){
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
     adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
     for(int i=0;i<n_vertices;i++){
-        vertices[i] = new Vertice(i+1);
+        vertices[i] = new Vertice();
         adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
         for(int j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
@@ -88,7 +88,7 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input){
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
     adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
     for(int i=0;i<n_vertices;i++){
-        vertices[i] = new Vertice(i+1);
+        vertices[i] = new Vertice();
         adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
         for(int j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
@@ -99,6 +99,22 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input){
     while(fscanf(input, "%d %d", &v1, &v2) != EOF){
         setAdjacencia(v1,v2);
     }
+}
+
+MatrizAdjacencias::~MatrizAdjacencias(){
+	free(vertices);
+	for(int i=0; i<n_vertices;i++){
+		free(adjacencias[i]);
+	}
+	free(adjacencias);
+}
+
+int MatrizAdjacencias::getNVertices(){
+    return n_vertices;
+}
+
+int MatrizAdjacencias::getNArestas(){
+    return n_arestas;
 }
 
 void MatrizAdjacencias::setAdjacencia(int v1, int v2){
@@ -115,10 +131,10 @@ void MatrizAdjacencias::BFS(int origem){
     }
     queue<int> Q;
     int nivel;
-    vertices[origem-1]->marca();
-    Q.push(origem-1);
-    vertices[origem-1]->setNivel(0);
-    vertices[origem-1]->setPai(0);
+    vertices[origem]->marca();
+    Q.push(origem);
+    vertices[origem]->setNivel(0);
+    vertices[origem]->setPai(-1);
     int v;
     int i;
     while(!Q.empty()){
@@ -130,7 +146,7 @@ void MatrizAdjacencias::BFS(int origem){
                     vertices[i]->marca();
                     nivel = vertices[v]->getNivel()+1;
                     vertices[i]->setNivel(nivel);
-                    vertices[i]->setPai(v+1);
+                    vertices[i]->setPai(v);
                     Q.push(i);
                 }
             }
@@ -138,37 +154,64 @@ void MatrizAdjacencias::BFS(int origem){
     } 
 }
 void MatrizAdjacencias::DFS(int origem){
-    for(int i=0;i<n_vertices;i++){
-        vertices[i]->desmarca();
-    }
-    stack<int> S;
-    S.push(origem-1);
-    int v;
-    int i;
-    while(!S.empty()){
-        v = S.top();
-        S.pop();
-        if(vertices[v]->getMarcacao()==0){
-            vertices[v]->marca();
-            for(i=n_vertices-1;i>=0;i--){
-                if(adjacencias[v][i]){
-                    S.push(i);
-                }
-            }
+    
+  // Iterador de for
+  int i;
+
+  // Lista de ponteiros para tuplas
+  Tupla** listaTupla = (Tupla**) malloc(sizeof(Tupla*)*n_vertices);
+
+  // Criando stack de ponteiros para tuplas
+  stack<Tupla*> S;
+
+  // Criando variável iterável do DFS
+  Tupla* tupla;	
+
+	int nivel;
+
+	for(int i=0;i<n_vertices;i++){
+    vertices[i]->desmarca();
+
+    listaTupla[i] = (Tupla*) malloc(sizeof(Tupla));
+
+		listaTupla[i]->vertice = i;
+  }
+
+	listaTupla[origem]->pai = -1;
+	S.push(listaTupla[origem]);
+
+  while(!S.empty()){
+    tupla = S.top();
+		printf("Analisando vértice %d\n", tupla->vertice+1);
+    S.pop();
+    if(vertices[tupla->vertice]->getMarcacao()==0){
+			printf("Definindo pai de %d como %d\n", tupla->vertice+1, tupla->pai+1);
+			vertices[tupla->vertice]->setPai(tupla->pai);
+			nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel()+1 : 0;
+			printf("Definindo nível de %d como %d\n", tupla->vertice+1, nivel);
+			vertices[tupla->vertice]->setNivel(nivel);
+      vertices[tupla->vertice]->marca();
+  	  for(i=n_vertices-1;i>=0;i--){
+        if(adjacencias[tupla->vertice][i]){
+					printf("Possível pai de %d marcado como %d\n", listaTupla[i]->vertice+1, tupla->vertice+1);
+					listaTupla[i]->pai = tupla->vertice;
+          S.push(listaTupla[i]);
         }
+    	}
     }
+  }
 }
 
 void MatrizAdjacencias::componentesConexos(){}
 
 
-ListaAdjacencias::ListaAdjacencias(int  n){
+ListaAdjacencias::ListaAdjacencias(int n){
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
     adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
     for(int i=0;i<n_vertices;i++){
-        vertices[i] = new Vertice(i+1);
+        vertices[i] = new Vertice();
         adjacencias[i] = new list<int>;
     }
 }
@@ -179,7 +222,7 @@ ListaAdjacencias::ListaAdjacencias(FILE *input){
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
     adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
     for(int i=0;i<n_vertices;i++){
-        vertices[i] = new Vertice(i+1);
+        vertices[i] = new Vertice();
         adjacencias[i] = new list<int>;
     }
 
@@ -188,6 +231,19 @@ ListaAdjacencias::ListaAdjacencias(FILE *input){
         setAdjacencia(v1,v2);
     }
 
+}
+
+ListaAdjacencias::~ListaAdjacencias(){
+	free(vertices);
+	free(adjacencias);
+}
+
+int ListaAdjacencias::getNVertices(){
+    return n_vertices;
+}
+
+int ListaAdjacencias::getNArestas(){
+    return n_arestas;
 }
 
 void ListaAdjacencias::setAdjacencia(int v1, int v2){
@@ -205,10 +261,10 @@ void ListaAdjacencias::BFS(int origem){
     }
     queue<int> Q;
     int nivel;
-    vertices[origem-1]->marca();
-    Q.push(origem-1);
-    vertices[origem-1]->setNivel(0);
-    vertices[origem-1]->setPai(0);
+    vertices[origem]->marca();
+    Q.push(origem);
+    vertices[origem]->setNivel(0);
+    vertices[origem]->setPai(-1);
     while(!Q.empty()){
         v = Q.front();
         Q.pop();
@@ -219,7 +275,7 @@ void ListaAdjacencias::BFS(int origem){
                 vertices[*w]->marca();
                 nivel = vertices[v]->getNivel()+1;
                 vertices[*w]->setNivel(nivel);
-                vertices[*w]->setPai(v+1);
+                vertices[*w]->setPai(v);
                 Q.push(*w);
             }
         }
@@ -227,12 +283,9 @@ void ListaAdjacencias::BFS(int origem){
 }
 
 void ListaAdjacencias::DFS(int origem){
-    // Definindo Tupla para marcação de vértice pai
-    typedef struct Tupla{
-       int vertice;
-       int pai;
-     } Tupla;    
-  
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // Declaração de variáveis locais
    
     // Iterador de for
@@ -253,39 +306,55 @@ void ListaAdjacencias::DFS(int origem){
     // Definindo um iterador para lista vizinhos
     list<int>::iterator w;
 
+		int nivel;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar DFS
+
     // For de inicialização do DFS
     for(i=0;i<n_vertices;i++){
       // Desmarcando todos os vértices
       vertices[i]->desmarca();
       
-      // Alocando espaço para a tupla e guardando na lista
-      // Número máximo de elementos da pilha é igual a N
-      listaTupla[i] = (Tupla*) malloc(sizeof(Tupla)*n_vertices);
+      listaTupla[i] = (Tupla*) malloc(sizeof(Tupla));
 
-      // Inicializando vértices nas tuplas de forma que estejam ordenados em relação aos índices do grafo
-      // Detalhe: não podemos inicializar tupla->pai, pois vai depender do grafo
-      listaTupla[i]->vertice = i;
+			listaTupla[i]->vertice = i;
     }
+
+		listaTupla[origem]->pai = -1;
 
     // Botando o ponteiro da tupla do vértice de origem no stack
     S.push(listaTupla[origem]);
     
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // DFS
 
     while(!S.empty()){
         // Definindo tupla a ser analizada como o topo da pilha
         tupla = S.top();
 
-        // O pai é o vértice que botou a tupla na pilha mais recentemente
-        // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
-        if(vertices[tupla->vertice]->getPai() == -1){
-            vertices[tupla->vertice]->setPai(tupla->pai);
-        }
+        printf("Analisando vértice %d\n", tupla->vertice);
 
         // Retirando tupla da pilha
         S.pop();
 
         // Se vértice ainda não foi marcado, realizar busca dentro dele
         if(vertices[tupla->vertice]->getMarcacao()==0){
+						printf("Definindo pai de %d como %d\n", tupla->vertice+1, tupla->pai+1);
+						
+						// O pai é o vértice que botou a tupla na pilha mais recentemente
+        		// Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
+						vertices[tupla->vertice]->setPai(tupla->pai);
+						
+						printf("Pai de %d é %d\n", tupla->vertice, vertices[tupla->vertice]->getPai());
+						//nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel()+1 : 0;
+						//printf("Definindo nível de %d como %d\n", tupla->vertice+1, nivel);
+
+						// Nível do vértice é igual ao nível do pai +1
+						//vertices[tupla->vertice]->setNivel(nivel);
+
             // Marca o vértice com o número de sua componente conexa
             vertices[tupla->vertice]->marca();
             // Definindo lista vizinhos como lista de vértices adjacentes de tupla->vertice
@@ -294,7 +363,9 @@ void ListaAdjacencias::DFS(int origem){
             for(w = vizinhos->begin();w!=vizinhos->end();w++){
                 // A tupla guarda o vértice tupla->vertice como possível pai de w
                 // Ele só será definido como pai se ele estiver definido como pai de w quando w for tirado da pilha pela primeira vez
-                listaTupla[*w]->pai = tupla->vertice;              
+								printf("Possível pai de %d marcado como %d\n", listaTupla[*w]->vertice+1, tupla->vertice+1);
+								listaTupla[*w]->pai = tupla->vertice;
+                // Inserindo tupla do vizinho no stack              
                 S.push(listaTupla[*w]);
             }
         }
