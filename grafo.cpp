@@ -247,6 +247,12 @@ void ListaAdjacencias::DFS(int origem){
     // Criando variável iterável do DFS
     Tupla* tupla;
 
+    // Declarando lista de vizinhos do vértice sendo analisado no DFS
+    list<int> *vizinhos;
+
+    // Definindo um iterador para lista vizinhos
+    list<int>::iterator w;
+
     // For de inicialização do DFS
     for(i=0;i<n_vertices;i++){
       // Desmarcando todos os vértices
@@ -257,6 +263,7 @@ void ListaAdjacencias::DFS(int origem){
       listaTupla[i] = (Tupla*) malloc(sizeof(Tupla)*n_vertices);
 
       // Inicializando vértices nas tuplas de forma que estejam ordenados em relação aos índices do grafo
+      // Detalhe: não podemos inicializar tupla->pai, pois vai depender do grafo
       listaTupla[i]->vertice = i;
     }
 
@@ -269,16 +276,24 @@ void ListaAdjacencias::DFS(int origem){
         tupla = S.top();
 
         // O pai é o vértice que botou a tupla na pilha mais recentemente
-        vertices[tupla->vertice]->setPai(tupla->pai);
+        // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
+        if(vertices[tupla->vertice]->getPai() == -1){
+            vertices[tupla->vertice]->setPai(tupla->pai);
+        }
 
         // Retirando tupla da pilha
         S.pop();
 
+        // Se vértice ainda não foi marcado, realizar busca dentro dele
         if(vertices[tupla->vertice]->getMarcacao()==0){
+            // Marca o vértice com o número de sua componente conexa
             vertices[tupla->vertice]->marca();
-            list<int>::iterator w;
-            list<int> *vizinhos = adjacencias[tupla->vertice];
+            // Definindo lista vizinhos como lista de vértices adjacentes de tupla->vertice
+            vizinhos = adjacencias[tupla->vertice];
+            // Iterando sobre todos elementos da lista vizinhos e adicionando-os à pilha
             for(w = vizinhos->begin();w!=vizinhos->end();w++){
+                // A tupla guarda o vértice tupla->vertice como possível pai de w
+                // Ele só será definido como pai se ele estiver definido como pai de w quando w for tirado da pilha pela primeira vez
                 listaTupla[*w]->pai = tupla->vertice;              
                 S.push(listaTupla[*w]);
             }
