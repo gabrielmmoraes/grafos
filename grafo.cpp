@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Vertice::Vertice(unsigned long i){
+Vertice::Vertice(int i){
     indice = i;
     grau = 0;
     marcacao = 0;
@@ -16,23 +16,23 @@ Vertice::Vertice(unsigned long i){
     nivel = -1;
 }
 
-unsigned long Vertice::getIndice(){
+int Vertice::getIndice(){
     return indice;
 }
 
-unsigned long Vertice::getGrau(){
+int Vertice::getGrau(){
     return grau;
 }
 
-unsigned long Vertice::getPai(){
+int Vertice::getPai(){
     return pai;
 }
 
-unsigned long Vertice::getNivel(){
+int Vertice::getNivel(){
     return nivel;
 }
 
-uint8_t Vertice::getMarcacao(){
+int Vertice::getMarcacao(){
     return marcacao;
 }
 
@@ -59,24 +59,24 @@ void Vertice::marca(int i){
     // marcacao = i;
 }
 
-Aresta::Aresta(unsigned long v1, unsigned long v2){
+Aresta::Aresta(int v1, int v2){
     v[0] = new Vertice(v1);
     v[1] = new Vertice(v2);
 }
 
-Vertice* Aresta::getVertice(unsigned long v){
+Vertice* Aresta::getVertice(int v){
     return this->v[v-1];
 }
 
-MatrizAdjacencias::MatrizAdjacencias(unsigned long n){
+MatrizAdjacencias::MatrizAdjacencias(int n){
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (unsigned long**) malloc(sizeof(unsigned long*)*n_vertices);
-    for(unsigned long i=0;i<n_vertices;i++){
+    adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
+    for(int i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = (unsigned long*) malloc(sizeof(unsigned long)*n_vertices);
-        for(unsigned long j=0;j<n_vertices;j++){
+        adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
+        for(int j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
         }
     }
@@ -86,22 +86,22 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input){
     fscanf(input, "%d", &n_vertices);
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (unsigned long**) malloc(sizeof(unsigned long*)*n_vertices);
-    for(unsigned long i=0;i<n_vertices;i++){
+    adjacencias = (int**) malloc(sizeof(int*)*n_vertices);
+    for(int i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = (unsigned long*) malloc(sizeof(unsigned long)*n_vertices);
-        for(unsigned long j=0;j<n_vertices;j++){
+        adjacencias[i] = (int*) malloc(sizeof(int)*n_vertices);
+        for(int j=0;j<n_vertices;j++){
             adjacencias[i][j] = 0;
         }
     }
     
-    unsigned long v1, v2;
+    int v1, v2;
     while(fscanf(input, "%d %d", &v1, &v2) != EOF){
         setAdjacencia(v1,v2);
     }
 }
 
-void MatrizAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
+void MatrizAdjacencias::setAdjacencia(int v1, int v2){
     adjacencias[v1-1][v2-1] = 1;
     adjacencias[v2-1][v1-1] = 1;
     vertices[v1-1]->incrementaGrau();
@@ -109,18 +109,18 @@ void MatrizAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
     n_arestas++;
 }
 
-void MatrizAdjacencias::BFS(unsigned long origem){
-    for(unsigned long i=0;i<n_vertices;i++){
+void MatrizAdjacencias::BFS(int origem){
+    for(int i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    queue<unsigned long> Q;
-    unsigned long nivel;
+    queue<int> Q;
+    int nivel;
     vertices[origem-1]->marca();
     Q.push(origem-1);
     vertices[origem-1]->setNivel(0);
     vertices[origem-1]->setPai(0);
-    unsigned long v;
-    unsigned long i;
+    int v;
+    int i;
     while(!Q.empty()){
         v = Q.front();
         Q.pop();
@@ -137,14 +137,14 @@ void MatrizAdjacencias::BFS(unsigned long origem){
         }
     } 
 }
-void MatrizAdjacencias::DFS(unsigned long origem){
-    for(unsigned long i=0;i<n_vertices;i++){
+void MatrizAdjacencias::DFS(int origem){
+    for(int i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    stack<unsigned long> S;
+    stack<int> S;
     S.push(origem-1);
-    unsigned long v;
-    unsigned long i;
+    int v;
+    int i;
     while(!S.empty()){
         v = S.top();
         S.pop();
@@ -162,14 +162,14 @@ void MatrizAdjacencias::DFS(unsigned long origem){
 void MatrizAdjacencias::componentesConexos(){}
 
 
-ListaAdjacencias::ListaAdjacencias(unsigned long  n){
+ListaAdjacencias::ListaAdjacencias(int  n){
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (list<unsigned long>**) malloc(sizeof(list<unsigned long>*)*n_vertices);
-    for(unsigned long i=0;i<n_vertices;i++){
+    adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
+    for(int i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = new list<unsigned long>;
+        adjacencias[i] = new list<int>;
     }
 }
 
@@ -177,20 +177,20 @@ ListaAdjacencias::ListaAdjacencias(FILE *input){
     fscanf(input, "%d", &n_vertices);
     n_arestas = 0;
     vertices = (Vertice**) malloc(sizeof(Vertice*)*n_vertices);
-    adjacencias = (list<unsigned long>**) malloc(sizeof(list<unsigned long>*)*n_vertices);
-    for(unsigned long i=0;i<n_vertices;i++){
+    adjacencias = (list<int>**) malloc(sizeof(list<int>*)*n_vertices);
+    for(int i=0;i<n_vertices;i++){
         vertices[i] = new Vertice(i+1);
-        adjacencias[i] = new list<unsigned long>;
+        adjacencias[i] = new list<int>;
     }
 
-    unsigned long v1, v2;
+    int v1, v2;
     while(fscanf(input, "%d %d", &v1, &v2) != EOF){
         setAdjacencia(v1,v2);
     }
 
 }
 
-void ListaAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
+void ListaAdjacencias::setAdjacencia(int v1, int v2){
     adjacencias[v1-1]->push_back(v2-1);
     adjacencias[v2-1]->push_back(v1-1);
     vertices[v1-1]->incrementaGrau();
@@ -198,13 +198,13 @@ void ListaAdjacencias::setAdjacencia(unsigned long v1, unsigned long v2){
     n_arestas++;
 }
 
-void ListaAdjacencias::BFS(unsigned long origem){
-    unsigned long v;
-    for(unsigned long i=0;i<n_vertices;i++){
+void ListaAdjacencias::BFS(int origem){
+    int v;
+    for(int i=0;i<n_vertices;i++){
         vertices[i]->desmarca();
     }
-    queue<unsigned long> Q;
-    unsigned long nivel;
+    queue<int> Q;
+    int nivel;
     vertices[origem-1]->marca();
     Q.push(origem-1);
     vertices[origem-1]->setNivel(0);
@@ -212,8 +212,8 @@ void ListaAdjacencias::BFS(unsigned long origem){
     while(!Q.empty()){
         v = Q.front();
         Q.pop();
-        list<unsigned long>::iterator w;
-        list<unsigned long> *vizinhos = adjacencias[v];
+        list<int>::iterator w;
+        list<int> *vizinhos = adjacencias[v];
         for(w = vizinhos->begin();w!= vizinhos->end();w++){
             if(vertices[*w]->getMarcacao()==0){
                 vertices[*w]->marca();
@@ -226,25 +226,65 @@ void ListaAdjacencias::BFS(unsigned long origem){
     }
 }
 
-void ListaAdjacencias::DFS(unsigned long origem){
-    for(unsigned long i=0;i<n_vertices;i++){
-        vertices[i]->desmarca();
+void ListaAdjacencias::DFS(int origem){
+    // Definindo Tupla para marcação de vértice pai
+    typedef struct Tupla{
+       int vertice;
+       int pai;
+     } Tupla;    
+  
+    // Declaração de variáveis locais
+   
+    // Iterador de for
+    int i;
+
+    // Lista de ponteiros para tuplas
+    Tupla** listaTupla = (Tupla**) malloc(sizeof(Tupla*)*n_vertices);
+
+    // Criando stack de ponteiros para tuplas
+    stack<Tupla*> S;
+
+    // Criando variável iterável do DFS
+    Tupla* tupla;
+
+    // For de inicialização do DFS
+    for(i=0;i<n_vertices;i++){
+      // Desmarcando todos os vértices
+      vertices[i]->desmarca();
+      
+      // Alocando espaço para a tupla e guardando na lista
+      // Número máximo de elementos da pilha é igual a N
+      listaTupla[i] = (Tupla*) malloc(sizeof(Tupla)*n_vertices);
+
+      // Inicializando vértices nas tuplas de forma que estejam ordenados em relação aos índices do grafo
+      listaTupla[i]->vertice = i;
     }
-    stack<unsigned long> S;
-    S.push(origem-1);
-    unsigned long v;
+
+    // Botando o ponteiro da tupla do vértice de origem no stack
+    S.push(listaTupla[origem]);
+    
+
     while(!S.empty()){
-        S.top();
+        // Definindo tupla a ser analizada como o topo da pilha
+        tupla = S.top();
+
+        // O pai é o vértice que botou a tupla na pilha mais recentemente
+        vertices[tupla->vertice]->setPai(tupla->pai);
+
+        // Retirando tupla da pilha
         S.pop();
-        if(vertices[v]->getMarcacao()==0){
-            vertices[v]->marca();
-            list<unsigned long>::iterator w;
-            list<unsigned long> *vizinhos = adjacencias[v];
+
+        if(vertices[tupla->vertice]->getMarcacao()==0){
+            vertices[tupla->vertice]->marca();
+            list<int>::iterator w;
+            list<int> *vizinhos = adjacencias[tupla->vertice];
             for(w = vizinhos->begin();w!=vizinhos->end();w++){
-                S.push(*w);
+                listaTupla[*w]->pai = tupla->vertice;              
+                S.push(listaTupla[*w]);
             }
         }
     }
 }
+
 
 void ListaAdjacencias::componentesConexos(){}   

@@ -3,13 +3,13 @@
 
 class Vertice{
     public:
-        Vertice(unsigned long i);
+        Vertice(int i);
         
-        unsigned long getIndice();
-        unsigned long getGrau();
-        unsigned long getPai();
-        unsigned long getNivel();
-        uint8_t getMarcacao();
+        int getIndice();
+        int getGrau();
+        int getPai();
+        int getNivel();
+        int getMarcacao();
 
         void incrementaGrau();
         void setPai(int v);
@@ -18,18 +18,18 @@ class Vertice{
         void marca(int i=1);
     protected:
     private:
-        unsigned long indice;
-        unsigned long grau;
-        uint8_t marcacao;
-        unsigned long pai;
-        unsigned long nivel;
+        int indice;
+        int grau;
+        int marcacao;
+        int pai;
+        int nivel;
         
 };
 
 class Aresta{
     public:
-        Aresta(unsigned long v1, unsigned long v2);
-        Vertice* getVertice(unsigned long v);
+        Aresta(int v1, int v2);
+        Vertice* getVertice(int v);
     protected:
     private:
         Vertice *v[2];
@@ -37,41 +37,41 @@ class Aresta{
 
 class MatrizAdjacencias{
     public:
-        MatrizAdjacencias(unsigned long n);
+        MatrizAdjacencias(int n);
         MatrizAdjacencias(FILE *input);
 
-        void setAdjacencia(unsigned long v1, unsigned long v2);
+        void setAdjacencia(int v1, int v2);
 
-        void BFS(unsigned long origem);
-        void DFS(unsigned long origem);
+        void BFS(int origem);
+        void DFS(int origem);
 
         void componentesConexos();
 
     protected:
     private:
-        unsigned long n_vertices;
-        unsigned long n_arestas;
+        int n_vertices;
+        int n_arestas;
         Vertice **vertices;
-        unsigned long **adjacencias;
+        int **adjacencias;
 };
 
 class ListaAdjacencias{
     public:
-        ListaAdjacencias(unsigned long n);
+        ListaAdjacencias(int n);
         ListaAdjacencias(FILE *input);
 
-        void setAdjacencia(unsigned long v1, unsigned long v2);
+        void setAdjacencia(int v1, int v2);
 
-        void BFS(unsigned long origem);
-        void DFS(unsigned long origem);
+        void BFS(int origem);
+        void DFS(int origem);
 
         void componentesConexos();
     protected:
     private:
-        unsigned long n_vertices;
-        unsigned long n_arestas;
+        int n_vertices;
+        int n_arestas;
         Vertice **vertices;
-        list<unsigned long> **adjacencias;
+        list<int> **adjacencias;
 };
 
 #endif //GRAFO_H
