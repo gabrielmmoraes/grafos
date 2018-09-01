@@ -12,10 +12,10 @@ int main(){
 
     ListaAdjacencias lista(pFile);
 
-    lista.componentesConexos();
+    lista.DFS(0);
 
     for(int i=0; i<lista.getNVertices(); i++){
-        printf("CC do vertice %d é %d\n", i+1, lista.vertices[i]->getMarcacao());
+        printf("Pai do vertice %d é %d\n", i+1, lista.vertices[i]->getPai()+1);
     }
 
     // Apresentação dos resultados

@@ -12,11 +12,27 @@ using namespace std;
      int pai;
   } Tupla;
 
-typedef struct Lista{
+typedef struct ListNode{
+    ListNode* prev;
     int indice;
-    Lista* prox;
-    Lista* anterior;
-} Lista;
+    ListNode* prox;
+} ListNode;
+
+class Lista{
+    public:
+        Lista();
+        ~Lista();
+
+        void push(int i);
+
+        ListNode* getInicio();
+        ListNode* getFim();
+    protected:
+    private:
+        int tamanho;
+        ListNode* inicio;
+        ListNode* fim;
+};
 
 class Vertice{
     public:
@@ -97,7 +113,8 @@ class ListaAdjacencias{
     private:
         int n_vertices;
         int n_arestas;
-        list<int> **adjacencias;
+        //list<int> **adjacencias;
+        Lista **adjacencias;
 };
 
 #endif //GRAFO_H

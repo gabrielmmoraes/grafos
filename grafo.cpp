@@ -7,6 +7,46 @@
 
 using namespace std;
 
+Lista::Lista(){
+    inicio = (ListNode*) malloc(sizeof(ListNode));
+    fim = inicio;
+    tamanho = 0;
+}
+
+Lista::~Lista(){
+    ListNode* no = inicio;
+    while(inicio->prox!=NULL){
+        no = inicio;
+        inicio = inicio->prox;
+        free(no);
+    }
+    free(inicio);
+    free(fim);
+}
+
+void Lista::push(int i){
+    ListNode* no = (ListNode*) malloc(sizeof(ListNode));
+    no->indice = i;
+    no->prox = NULL;
+    if(inicio==NULL){
+        no->prev = NULL;
+        inicio = no;
+    }
+    else{
+        no->prev = fim;
+        fim->prox = no;
+    }
+    fim = no;
+}
+
+ListNode* Lista::getInicio(){
+    return inicio;
+}
+
+ListNode* Lista::getFim(){
+    return fim;
+}
+
 Vertice::Vertice()
 {
     grau = 0;
@@ -291,11 +331,12 @@ ListaAdjacencias::ListaAdjacencias(int n)
     n_vertices = n;
     n_arestas = 0;
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
-    adjacencias = (list<int> **)malloc(sizeof(list<int> *) * n_vertices);
+    //adjacencias = (list<int> **)malloc(sizeof(list<int> *) * n_vertices);
+    adjacencias = (Lista**) malloc(sizeof(Lista*)*n_vertices);
     for (int i = 0; i < n_vertices; i++)
     {
         vertices[i] = new Vertice();
-        adjacencias[i] = new list<int>;
+        adjacencias[i] = new Lista();
     }
 }
 
@@ -304,11 +345,11 @@ ListaAdjacencias::ListaAdjacencias(FILE *input)
     fscanf(input, "%d", &n_vertices);
     n_arestas = 0;
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
-    adjacencias = (list<int> **)malloc(sizeof(list<int> *) * n_vertices);
+    adjacencias = (Lista **)malloc(sizeof(Lista *) * n_vertices);
     for (int i = 0; i < n_vertices; i++)
     {
         vertices[i] = new Vertice();
-        adjacencias[i] = new list<int>;
+        adjacencias[i] = new Lista();
     }
 
     int v1, v2;
@@ -336,8 +377,8 @@ int ListaAdjacencias::getNArestas()
 
 void ListaAdjacencias::setAdjacencia(int v1, int v2)
 {
-    adjacencias[v1 - 1]->push_back(v2 - 1);
-    adjacencias[v2 - 1]->push_back(v1 - 1);
+    adjacencias[v1 - 1]->push(v2 - 1);
+    adjacencias[v2 - 1]->push(v1 - 1);
     vertices[v1 - 1]->incrementaGrau();
     vertices[v2 - 1]->incrementaGrau();
     n_arestas++;
@@ -363,18 +404,20 @@ void ListaAdjacencias::BFS(int origem, int marcador)
     {
         v = Q.front();
         Q.pop();
-        list<int>::iterator w;
-        list<int> *vizinhos = adjacencias[v];
-        for (w = vizinhos->begin(); w != vizinhos->end(); ++w)
+        //list<int>::iterator w;
+        //list<int> *vizinhos = adjacencias[v];
+        ListNode* w = adjacencias[v]->getInicio();
+        while(w!=NULL)
         {
-            if (vertices[*w]->getMarcacao() == 0)
+            if (vertices[w->indice]->getMarcacao() == 0)
             {
-                vertices[*w]->marca(marcador);
+                vertices[w->indice]->marca(marcador);
                 nivel = vertices[v]->getNivel() + 1;
-                vertices[*w]->setNivel(nivel);
-                vertices[*w]->setPai(v);
-                Q.push(*w);
+                vertices[w->indice]->setNivel(nivel);
+                vertices[w->indice]->setPai(v);
+                Q.push(w->indice);
             }
+            w = w->prox;
         }
     }
 }
@@ -399,10 +442,10 @@ void ListaAdjacencias::DFS(int origem)
     Tupla *tupla;
 
     // Declarando lista de vizinhos do vértice sendo analisado no DFS
-    list<int> *vizinhos;
+    //list<int> *vizinhos;
 
     // Definindo um iterador para lista vizinhos
-    list<int>::iterator w;
+    //list<int>::iterator w;
 
     int nivel;
 
@@ -435,7 +478,7 @@ void ListaAdjacencias::DFS(int origem)
         // Definindo tupla a ser analizada como o topo da pilha
         tupla = S.top();
 
-        printf("Analisando vértice %d\n", tupla->vertice);
+        printf("Analisando vértice %d\n", tupla->vertice+1);
 
         // Retirando tupla da pilha
         S.pop();
@@ -449,26 +492,29 @@ void ListaAdjacencias::DFS(int origem)
             // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
             vertices[tupla->vertice]->setPai(tupla->pai);
 
-            printf("Pai de %d é %d\n", tupla->vertice, vertices[tupla->vertice]->getPai());
-            //nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel()+1 : 0;
-            //printf("Definindo nível de %d como %d\n", tupla->vertice+1, nivel);
+            printf("Pai de %d é %d\n", tupla->vertice+1, vertices[tupla->vertice]->getPai()+1);
+            nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel()+1 : 0;
+            printf("Definindo nível de %d como %d\n", tupla->vertice+1, nivel);
 
             // Nível do vértice é igual ao nível do pai +1
-            //vertices[tupla->vertice]->setNivel(nivel);
+            vertices[tupla->vertice]->setNivel(nivel);
 
             // Marca o vértice com o número de sua componente conexa
             vertices[tupla->vertice]->marca();
             // Definindo lista vizinhos como lista de vértices adjacentes de tupla->vertice
-            vizinhos = adjacencias[tupla->vertice];
+            //vizinhos = adjacencias[tupla->vertice];
             // Iterando sobre todos elementos da lista vizinhos e adicionando-os à pilha
-            for (w = vizinhos->begin(); w != vizinhos->end(); ++w)
+            ListNode* w = adjacencias[tupla->vertice]->getFim();
+            printf("Fim: %d\n", w->indice);
+            while (w!=NULL) 
             {
                 // A tupla guarda o vértice tupla->vertice como possível pai de w
                 // Ele só será definido como pai se ele estiver definido como pai de w quando w for tirado da pilha pela primeira vez
-                printf("Possível pai de %d marcado como %d\n", listaTupla[*w]->vertice + 1, tupla->vertice + 1);
-                listaTupla[*w]->pai = tupla->vertice;
+                printf("Possível pai de %d marcado como %d\n", listaTupla[w->indice]->vertice + 1, tupla->vertice + 1);
+                listaTupla[w->indice]->pai = tupla->vertice;
                 // Inserindo tupla do vizinho no stack
-                S.push(listaTupla[*w]);
+                S.push(listaTupla[w->indice]);
+                w = w->prev;
             }
         }
     }
@@ -498,16 +544,18 @@ void ListaAdjacencias::componentesConexos()
         {
             v = Q.front();
             Q.pop();
-            list<int>::iterator w;
-            list<int> *vizinhos = adjacencias[v];
-            for (w = vizinhos->begin(); w != vizinhos->end(); ++w)
+            //list<int>::iterator w;
+            //list<int> *vizinhos = adjacencias[v];
+            ListNode* w = adjacencias[v]->getInicio();
+            while(w!=NULL)
             {
-                if (vertices[*w]->getMarcacao() == 0)
+                if (vertices[w->indice]->getMarcacao() == 0)
                 {
-                    vertices[*w]->marca(marcador);
-                    desmarcados.erase(indices[*w]);
-                    Q.push(*w);
+                    vertices[w->indice]->marca(marcador);
+                    desmarcados.erase(indices[w->indice]);
+                    Q.push(w->indice);
                 }
+                w = w->prox;
             }
         }
         origem = desmarcados.front();
