@@ -63,7 +63,7 @@ class MatrizAdjacencias{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem);
+        void BFS(int origem, int marcador=1);
         void DFS(int origem);
 
         void componentesConexos();
@@ -87,7 +87,7 @@ class ListaAdjacencias{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem);
+        void BFS(int origem, int marcador=1);
         void DFS(int origem);
 
         void componentesConexos();
