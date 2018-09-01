@@ -23,7 +23,11 @@ class Lista{
         Lista();
         ~Lista();
 
-        void push(int i);
+        ListNode* push(int i);
+        void erase(ListNode* no);
+
+        bool vazia();
+        int getTamanho();
 
         ListNode* getInicio();
         ListNode* getFim();
