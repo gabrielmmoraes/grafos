@@ -176,6 +176,52 @@ Vertice *Aresta::getVertice(int v)
     return this->v[v - 1];
 }
 
+Grafo::Grafo(){}
+
+Grafo::~Grafo(){}
+
+int Grafo::getGrauMin(){
+    int min = n_vertices;
+    int grau;
+
+    for(int i=0; i<n_vertices;i++){
+        grau = vertices[i]->getGrau();
+        if(!grau) return grau;
+        min = grau < min ? grau : min;
+    }
+
+    return min;
+}
+
+int Grafo::getGrauMax(){
+    int max = 0;
+    int grau;
+
+    for(int i=0; i<n_vertices;i++){
+        grau = vertices[i]->getGrau();
+        if(grau==n_vertices-1) return grau;
+        max = grau > max ? grau : max;
+    }
+
+    return max;
+}
+
+int Grafo::getGrauMedio(){
+    int acum = 0;
+
+    for(int i=0; i<n_vertices;i++)  acum+=vertices[i]->getGrau();    
+
+    return acum/n_vertices;
+}
+
+int Grafo::getGrauMediano(){
+
+}
+
+Vertice** Grafo::getVertices(){
+    return vertices;
+}
+
 MatrizAdjacencias::MatrizAdjacencias(int n)
 {
     n_vertices = n;
@@ -212,6 +258,7 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input)
     int v1, v2;
     while (fscanf(input, "%d %d", &v1, &v2) != EOF)
     {
+        if(v1 > n_vertices || v2 > n_vertices) continue;
         setAdjacencia(v1, v2);
     }
 }
@@ -333,11 +380,15 @@ void MatrizAdjacencias::DFS(int origem)
     }
 }
 
-void MatrizAdjacencias::componentesConexos()
+int MatrizAdjacencias::componentesConexos()
 {
     Lista desmarcados;
     ListNode **indices = (ListNode **)malloc(sizeof(ListNode *) * n_vertices);
     ListNode *no;
+
+    Lista tamanhos;
+    int tamanho;
+
     for (int i = 0; i < n_vertices; i++)
     {
         vertices[i]->desmarca();
@@ -351,6 +402,7 @@ void MatrizAdjacencias::componentesConexos()
     while (!desmarcados.vazia())
     {
         vertices[origem]->marca(marcador);
+        tamanho = 1;
         desmarcados.erase(indices[origem]);
         Q.push(origem);
         int v;
@@ -366,6 +418,7 @@ void MatrizAdjacencias::componentesConexos()
                     if (vertices[i]->getMarcacao() == 0)
                     {
                         vertices[i]->marca(marcador);
+                        tamanho++;
                         desmarcados.erase(indices[i]);
                         Q.push(i);
                     }
@@ -377,7 +430,9 @@ void MatrizAdjacencias::componentesConexos()
         if(!no) break;
         origem = no->indice;
         marcador++;
+        tamanhos.push(tamanho);
     }
+    return marcador;
 }
 
 ListaAdjacencias::ListaAdjacencias(int n)
@@ -408,6 +463,7 @@ ListaAdjacencias::ListaAdjacencias(FILE *input)
     int v1, v2;
     while (fscanf(input, "%d %d", &v1, &v2) != EOF)
     {
+        if(v1 > n_vertices || v2 > n_vertices) continue;
         setAdjacencia(v1, v2);
     }
 }
@@ -492,6 +548,7 @@ void ListaAdjacencias::DFS(int origem)
     // Criando variável iterável do DFS
     Tupla *tupla;
 
+    // Variável que auxiliar para guardar o nível de profundidade atual da DFS
     int nivel;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,11 +561,15 @@ void ListaAdjacencias::DFS(int origem)
         // Desmarcando todos os vértices
         vertices[i]->desmarca();
 
-        listaTupla[i] = (Tupla *)malloc(sizeof(Tupla));
+        // Aloca memória para uma tupla e guarda seu ponteiro na lista de tuplas
+        listaTupla[i] = (Tupla *) malloc(sizeof(Tupla));
 
+        // Inicializa a tupla definindo o vértice que ela corresponde como i
+        // Ou seja, cada vértice tem sua tupla correspondente
         listaTupla[i]->vertice = i;
     }
 
+    // Definindo o pai da origem do DFS como -1 (pois nenhum vértice o descobre)
     listaTupla[origem]->pai = -1;
 
     // Botando o ponteiro da tupla do vértice de origem no stack
@@ -518,6 +579,7 @@ void ListaAdjacencias::DFS(int origem)
 
     // DFS
 
+    // Enquanto houverem ponteiros no stack, executa DFS
     while (!S.empty())
     {
         // Definindo tupla a ser analizada como o topo da pilha
@@ -529,11 +591,11 @@ void ListaAdjacencias::DFS(int origem)
         // Se vértice ainda não foi marcado, realizar busca dentro dele
         if (vertices[tupla->vertice]->getMarcacao() == 0)
         {
-
             // O pai é o vértice que botou a tupla na pilha mais recentemente
             // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
             vertices[tupla->vertice]->setPai(tupla->pai);
 
+            // Se o pai do vértice 
             nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
 
             // Nível do vértice é igual ao nível do pai +1
@@ -557,7 +619,7 @@ void ListaAdjacencias::DFS(int origem)
     }
 }
 
-void ListaAdjacencias::componentesConexos()
+int ListaAdjacencias::componentesConexos()
 {
     Lista desmarcados;
     ListNode **indices = (ListNode**) malloc(sizeof(ListNode*)*n_vertices);
@@ -599,4 +661,5 @@ void ListaAdjacencias::componentesConexos()
         origem = no->indice;
         marcador++;
     }
+    return marcador;
 }

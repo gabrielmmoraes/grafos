@@ -72,7 +72,26 @@ class Aresta{
         Vertice *v[2];
 };
 
-class MatrizAdjacencias{
+class Grafo{
+    public:
+        Grafo();
+        ~Grafo();
+
+        int getGrauMin();
+        int getGrauMax();
+        int getGrauMedio();
+        int getGrauMediano();
+
+        Vertice** getVertices();
+
+    protected:
+        int n_vertices;
+        int n_arestas;
+        Vertice** vertices;
+    private:
+};
+
+class MatrizAdjacencias: public Grafo{
     public:
         MatrizAdjacencias(int n);
         ~MatrizAdjacencias();
@@ -86,17 +105,14 @@ class MatrizAdjacencias{
         void BFS(int origem, int marcador=1);
         void DFS(int origem);
 
-        void componentesConexos();
+        int componentesConexos();
 
-        Vertice **vertices;
     protected:
     private:
-        int n_vertices;
-        int n_arestas;
         int **adjacencias;
 };
 
-class ListaAdjacencias{
+class ListaAdjacencias: public Grafo{
     public:
         ListaAdjacencias(int n);
         ~ListaAdjacencias();
@@ -110,14 +126,10 @@ class ListaAdjacencias{
         void BFS(int origem, int marcador=1);
         void DFS(int origem);
 
-        void componentesConexos();
+        int componentesConexos();
         
-        Vertice **vertices;
     protected:
     private:
-        int n_vertices;
-        int n_arestas;
-        //list<int> **adjacencias;
         Lista **adjacencias;
 };
 
