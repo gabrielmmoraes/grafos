@@ -86,8 +86,8 @@ class Grafo{
 
         int getGrauMin();
         int getGrauMax();
-        int getGrauMedio();
-        int getGrauMediano();
+        float getGrauMedio();
+        float getGrauMediano();
 
         Vertice** getVertices();
 
@@ -113,7 +113,7 @@ class MatrizAdjacencias: public Grafo{
         void DFS(int origem);
 
         vector<Tupla> componentesConexos();
-        void analiseComponentesConexos();
+        Lista** analiseComponentesConexos();
 
     protected:
     private:
@@ -135,7 +135,7 @@ class ListaAdjacencias: public Grafo{
         void DFS(int origem);
 
         vector<Tupla> componentesConexos();
-        void analiseComponentesConexos();
+        Lista** analiseComponentesConexos();
         
     protected:
     private:

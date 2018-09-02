@@ -9,8 +9,7 @@
 
 using namespace std;
 
-Tupla::Tupla(){
-}
+Tupla::Tupla(){}
 
 Tupla::Tupla(int e1, int e2){
     elem1 = e1;
@@ -20,11 +19,11 @@ Tupla::Tupla(int e1, int e2){
 Tupla::~Tupla(){}
 
 bool Tupla::operator>(Tupla t){
-    return elem2>t.elem2?elem2:t.elem2;
+    return elem2 > t.elem2 ? elem2 : t.elem2;
 }
 
 bool Tupla::operator <(Tupla t){
-    return elem2<t.elem2?elem2:t.elem2;
+    return elem2 < t.elem2 ? elem2 : t.elem2;
 }
 
 // Inicializa lista vazia
@@ -107,7 +106,7 @@ void Lista::erase(ListNode *no)
 // Se o ponteiro de início estiver em NULL, a lista está vazia
 bool Lista::vazia()
 {
-    return inicio==NULL;
+    return inicio == NULL;
 }
 
 // Retorna tamanho da lista
@@ -255,7 +254,7 @@ int Grafo::getGrauMax(){
 }
 
 // Retorna o grau médio do grafo
-int Grafo::getGrauMedio(){
+float Grafo::getGrauMedio(){
     int acum = 0;
 
     for(int i=0; i<n_vertices;i++)  acum+=vertices[i]->getGrau();    
@@ -264,8 +263,15 @@ int Grafo::getGrauMedio(){
 }
 
 // Retorna o grau mediano do grafo
-int Grafo::getGrauMediano(){
+float Grafo::getGrauMediano(){
+    vector<int> graus;
+    for(int i = 0; i<n_vertices; i++){
+        graus.push_back(vertices[i]->getGrau());
+    }
 
+    sort(graus.begin(), graus.end());
+
+    return n_vertices % 2 == 1 ? graus[n_vertices/2] : (graus[n_vertices/2] + graus[n_vertices/2 + 1]) / 2;
 }
 
 
@@ -605,8 +611,13 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
             }
         }
 
+        // Guardando identificador da componente conexa na tupla
         t.elem1 = marcador;
+
+        // Guardando tamanha da componente conexa na tupla
         t.elem2 = tamanho;
+        
+        // Inserindo tupla no final do vetor
         tamanhos.push_back(t);
 
         no = desmarcados.getInicio();
@@ -618,22 +629,36 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
 }
 
 //Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
-void MatrizAdjacencias::analiseComponentesConexos(){
+Lista** MatrizAdjacencias::analiseComponentesConexos()
+{
     Tupla t;
     vector<Tupla> ccs = componentesConexos();
+    Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
+    int c = 0;
+
     make_heap(ccs.begin(),ccs.end());
+    
     while(!ccs.empty()){
+    
         t = ccs.front();
         pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
+    
+        componentesConexas[c] = new Lista();
+        componentesConexas[c]->push(t.elem1);
+
         printf("Componente conexa %d:\n",t.elem1);
         for(int i=0;i<n_vertices;i++){
             if(vertices[i]->getMarcacao()==t.elem1){
+                componentesConexas[c]->push(i);
                 printf("Vértice %d\n",i+1);
             }
         }
         sort_heap(ccs.begin(),ccs.end());
+        c++;
     }
+
+    return componentesConexas;
 }
 
 ListaAdjacencias::ListaAdjacencias(int n)
@@ -937,11 +962,14 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
     // Declaração de variáveis
 
     // Criando lista de desmarcados
-    // A classe Lista implementa uma lista duplamente encadeada (ListNode)
+    // A classe Lista implementa uma lista duplamente encadeada (ListNode)    
+    Lista desmarcados;
+
+
     Tupla t;
     vector<Tupla> tamanhos;
     int tamanho;
-    Lista desmarcados;
+
 
     // Criando lista de ponteiros para elementos de uma lista duplamente encadeada
     ListNode **indices = (ListNode**) malloc(sizeof(ListNode*)*n_vertices);
@@ -995,7 +1023,10 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
     {
         // Marcando o vértice sendo analisado
         vertices[origem]->marca(marcador);
+
+        // Inicializando tamanho da componente conexa como 1
         tamanho = 1;
+        
         // Retirando o vértice sendo analisado da lista de desmarcados
         desmarcados.erase(indices[origem]);
 
@@ -1025,7 +1056,10 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
                 {
                     // Marca-se o vértice
                     vertices[verticeVizinho]->marca(marcador);
+
+                    // Incrementando tamanho da componente conexa
                     tamanho++;
+                    
                     // Retira o vértice da lista de desmarcados
                     desmarcados.erase(indices[verticeVizinho]);
                     
@@ -1038,8 +1072,13 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
             }
         }
 
+        // Guardando identificador da componente conexa na tupla
         t.elem1 = marcador;
+
+        // Guardando tamanha da componente conexa na tupla
         t.elem2 = tamanho;
+        
+        // Inserindo tupla no final do vetor
         tamanhos.push_back(t);
 
         // Pega o primeiro elemento da lista de desmarcados
@@ -1060,20 +1099,35 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
     return tamanhos;
 }
 
-void ListaAdjacencias::analiseComponentesConexos(){
+//Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
+Lista** ListaAdjacencias::analiseComponentesConexos()
+{
     Tupla t;
     vector<Tupla> ccs = componentesConexos();
+    Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
+    int c = 0;
+
     make_heap(ccs.begin(),ccs.end());
+    
     while(!ccs.empty()){
+    
         t = ccs.front();
         pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
+    
+        componentesConexas[c] = new Lista();
+        componentesConexas[c]->push(t.elem1);
+
         printf("Componente conexa %d:\n",t.elem1);
         for(int i=0;i<n_vertices;i++){
             if(vertices[i]->getMarcacao()==t.elem1){
+                componentesConexas[c]->push(i);
                 printf("Vértice %d\n",i+1);
             }
         }
         sort_heap(ccs.begin(),ccs.end());
+        c++;
     }
+
+    return componentesConexas;
 }
