@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// Inicializa lista vazia
 Lista::Lista()
 {
     inicio = NULL;
@@ -14,6 +15,7 @@ Lista::Lista()
     tamanho = 0;
 }
 
+// Libera memória usada pela lista
 Lista::~Lista()
 {
     ListNode *no = inicio;
@@ -82,72 +84,92 @@ void Lista::erase(ListNode *no)
     free(no);
 }
 
+// Se o ponteiro de início estiver em NULL, a lista está vazia
 bool Lista::vazia()
 {
     return inicio==NULL;
 }
 
+// Retorna tamanho da lista
 int Lista::getTamanho(){
     return tamanho;
 }
 
+// Retorna ponteiro para o início da lista
 ListNode *Lista::getInicio()
 {
     return inicio;
 }
 
+// Retorna ponteiro para o fim da lista
 ListNode *Lista::getFim()
 {
     return fim;
 }
 
+// Inicializa um vértice
 Vertice::Vertice()
 {
+    // Todo vértice possui grau zero até seus vizinhos serem analisador
     grau = 0;
+
+    // O vértice começa desmarcado
     marcacao = 0;
+
+    // Possíveis valores de pai:
+    // -2 -> vértice ainda não descoberto
+    // -1 -> vértice raiz de uma busca (descoberto mas não possui pai)
+    // pai <= 0 -> índice do pai do vértice
     pai = -2;
+
+    // Inicializando nível como -1
     nivel = -1;
 }
 
-Vertice::~Vertice()
-{
-}
-
+// Retorna grau do vértice
 int Vertice::getGrau()
 {
     return grau;
 }
 
+// Retorna pai do vértice
 int Vertice::getPai()
 {
     return pai;
 }
 
+// Retorna nível do vértice
 int Vertice::getNivel()
 {
     return nivel;
 }
 
+// Retorna marcação  do vértice
+// (Representa qual componente conexa ele faz parte)
 int Vertice::getMarcacao()
 {
     return marcacao;
 }
 
+// Incrementa o grau do vértice
 void Vertice::incrementaGrau()
 {
     grau++;
 }
 
+// Define pai do vértice
 void Vertice::setPai(int v)
 {
     pai = v;
 }
 
+// Define nível do vértice
 void Vertice::setNivel(int n)
 {
     nivel = n;
 }
 
+// Desmarca o vértice e retorna pai e nível para seus valores de inicialização
 void Vertice::desmarca()
 {
     marcacao = 0;
@@ -155,22 +177,26 @@ void Vertice::desmarca()
     nivel = -1;
 }
 
+// Marca o vértice com o identificador de sua componente conexa
 void Vertice::marca(int i)
 {
     marcacao = i;
 }
 
+// Construtor cria uma nova aresta apontando para dois vértices
 Aresta::Aresta(int v1, int v2)
 {
     v[0] = new Vertice();
     v[1] = new Vertice();
 }
 
+// Destrutor libera memória usada pelo array usado para criação de vértices
 Aresta::~Aresta()
 {
     free(v);
 }
 
+// Retorna um ponteiro para um vértice da aresta
 Vertice *Aresta::getVertice(int v)
 {
     return this->v[v - 1];
@@ -312,6 +338,7 @@ int MatrizAdjacencias::getNArestas()
     return n_arestas;
 }
 
+// Define adjacência entre dois vértices
 void MatrizAdjacencias::setAdjacencia(int v1, int v2)
 {
     // Define o vértice v2 como vizinho de v1
@@ -327,6 +354,7 @@ void MatrizAdjacencias::setAdjacencia(int v1, int v2)
     vertices[v2 - 1]->incrementaGrau();
 }
 
+// Busca em largura a partir de um vértice origem
 void MatrizAdjacencias::BFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -403,6 +431,7 @@ void MatrizAdjacencias::BFS(int origem)
     }
 }
 
+// Busca em profundidade a partir de um vértice origem
 void MatrizAdjacencias::DFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -501,6 +530,7 @@ void MatrizAdjacencias::DFS(int origem)
     }
 }
 
+// Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs
 int MatrizAdjacencias::componentesConexos()
 {
     Lista desmarcados;
@@ -569,6 +599,7 @@ ListaAdjacencias::ListaAdjacencias(int n)
     }
 }
 
+// Constrói uma lista de adjacência a partir da descrição de um grafo dentro de um arquivo
 ListaAdjacencias::ListaAdjacencias(FILE *input)
 {
     // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
@@ -633,6 +664,7 @@ int ListaAdjacencias::getNArestas()
     return n_arestas;
 }
 
+// Define adjacência entre dois vértices
 void ListaAdjacencias::setAdjacencia(int v1, int v2)
 {
     // Adiciona o vértice v2 como vizinho de v1
@@ -648,6 +680,7 @@ void ListaAdjacencias::setAdjacencia(int v1, int v2)
     vertices[v2 - 1]->incrementaGrau();
 }
 
+// Busca em largura a partir de um vértice origem
 void ListaAdjacencias::BFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -735,6 +768,7 @@ void ListaAdjacencias::BFS(int origem)
     }
 }
 
+// Busca em profundidade a partir de um vértice origem
 void ListaAdjacencias::DFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

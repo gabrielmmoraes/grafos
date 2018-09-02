@@ -41,7 +41,6 @@ class Lista{
 class Vertice{
     public:
         Vertice();
-        ~Vertice();
         
         int getGrau();
         int getPai();
