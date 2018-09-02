@@ -241,43 +241,72 @@ MatrizAdjacencias::MatrizAdjacencias(int n)
 
 MatrizAdjacencias::MatrizAdjacencias(FILE *input)
 {
+    // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
     fscanf(input, "%d", &n_vertices);
+
+    // Inicializa o número de arestas como 0    
     n_arestas = 0;
+
+    // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
+    // Com isso conseguimos guardar características de cada vértice
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
+    
+    // Cria uma lista de ponteiros para listas, simulando uma matriz de tamanho n_vertice^2
+    // Com isso conseguimos acessar a relação entre dois vértices em tempo O(1)
     adjacencias = (int **)malloc(sizeof(int *) * n_vertices);
+    
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma linha da matriz de tamanho n_vertice
     for (int i = 0; i < n_vertices; i++)
     {
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice();
-        adjacencias[i] = (int *)malloc(sizeof(int) * n_vertices);
-        for (int j = 0; j < n_vertices; j++)
-        {
-            adjacencias[i][j] = 0;
-        }
+
+        // Cria linha da matriz com tamanho n_vertices e as iniciliza com valor 0
+        adjacencias[i] = (int *)calloc(n_vertices, sizeof(int));
     }
 
+    // Declaração de duas variáveis auxiliares para guardarem os vértices que serão fornecidos pela linha sendo
+    // lida no arquivo
     int v1, v2;
+
+    // Loop de leitura de linhas do arquivo que termina quando recebe EOF (End Of File)
     while (fscanf(input, "%d %d", &v1, &v2) != EOF)
     {
+        // Se o índice de qualquer um dos vértices na linha lida for maior que o n_vertice, descarta-se a informação
+        // e segue a próxima iteração do loop (pŕoxima linha)
         if(v1 > n_vertices || v2 > n_vertices) continue;
+
+        // Caso a condição acima não seja satisfeita, define-se adjacência simétrica entre os dois vértices
         setAdjacencia(v1, v2);
+
+        // Após processar informações da aresta, incrementa-se o valor total de n_arestas
+        n_arestas++;
     }
 }
 
+
+// Destrutor da Matriz de Adjacência. Libera o espaço de memória usado pela matriz e pela lista de vértices
 MatrizAdjacencias::~MatrizAdjacencias()
 {
+    // Libera a memória da lista de vértices
     free(vertices);
-    for (int i = 0; i < n_vertices; i++)
-    {
-        free(adjacencias[i]);
-    }
+
+    // Libera a memória de cada linha da matriz
+    for (int i = 0; i < n_vertices; i++) free(adjacencias[i]);
+    
+    // Libera a memória da lista de ponteiros para as linhas da matriz
     free(adjacencias);
 }
 
+
+// Retorna o número de vértices do grafo
 int MatrizAdjacencias::getNVertices()
 {
     return n_vertices;
 }
 
+
+// Retorna o número de arestas do grafo
 int MatrizAdjacencias::getNArestas()
 {
     return n_arestas;
@@ -285,52 +314,100 @@ int MatrizAdjacencias::getNArestas()
 
 void MatrizAdjacencias::setAdjacencia(int v1, int v2)
 {
+    // Define o vértice v2 como vizinho de v1
     adjacencias[v1 - 1][v2 - 1] = 1;
+
+    // Define o vértice v1 como vizinho de v2
     adjacencias[v2 - 1][v1 - 1] = 1;
+
+    // Considerando que agora v1 possui um vizinho a mais, incrementa-se seu grau
     vertices[v1 - 1]->incrementaGrau();
+
+    // Considerando que agora v2 possui um vizinho a mais, incrementa-se seu grau
     vertices[v2 - 1]->incrementaGrau();
-    n_arestas++;
 }
 
-void MatrizAdjacencias::BFS(int origem, int marcador)
+void MatrizAdjacencias::BFS(int origem)
 {
-    if (marcador == 1)
-    {
-        for (int i = 0; i < n_vertices; i++)
-        {
-            vertices[i]->desmarca();
-        }
-    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis locais
+
+    // Declaração da fila que será usada para selecionar próximo vértice
     queue<int> Q;
+    
+    // Variável auxiliar que guarda o nível do vértice atual    
     int nivel;
-    vertices[origem]->marca(marcador);
+
+    // Variável que guarda o vértice sendo analizado no momento dentro do BFS
+    int verticeAtual;
+    
+    // Variável iterável do for
+    int i;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar BFS
+
+    for (i = 0; i < n_vertices; i++)
+    {
+        // Desmarcando todos os vértices
+        vertices[i]->desmarca();
+    }
+
+    // Marcando vértice inicial como visitado
+    vertices[origem]->marca();
+
+    // Inserindo vértice na fila
     Q.push(origem);
+
+    // Definindo o nível da raiz do BFS como 0 e seu pai como -1
     vertices[origem]->setNivel(0);
     vertices[origem]->setPai(-1);
-    int v;
-    int i;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
     while (!Q.empty())
     {
-        v = Q.front();
+        // Definindo vértice atual como topo da fila
+        verticeAtual = Q.front();
+
+        // Retirando a cabeça da fila
         Q.pop();
+
         for (i = 0; i < n_vertices; i++)
         {
-            if (adjacencias[v][i])
+            // Checa se i é vizinho de verticeAtual
+            if (adjacencias[verticeAtual][i])
             {
+                // Checa se o vértice já foi marcado
                 if (vertices[i]->getMarcacao() == 0)
                 {
-                    vertices[i]->marca(marcador);
-                    nivel = vertices[v]->getNivel() + 1;
+                    // Marca o vértice
+                    vertices[i]->marca();
+
+                    // Define o nível como o nível do pai (verticeAtual) + 1
+                    nivel = vertices[verticeAtual]->getNivel() + 1;
                     vertices[i]->setNivel(nivel);
-                    vertices[i]->setPai(v);
+
+                    // Define o pai como o verticeAtual
+                    vertices[i]->setPai(verticeAtual);
+
+                    // Insere i na fila
                     Q.push(i);
                 }
             }
         }
     }
 }
+
 void MatrizAdjacencias::DFS(int origem)
 {
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis locais
 
     // Iterador de for
     int i;
@@ -344,35 +421,79 @@ void MatrizAdjacencias::DFS(int origem)
     // Criando variável iterável do DFS
     Tupla *tupla;
 
+    // Variável auxiliar para guardar o nível de profundidade atual da DFS
     int nivel;
 
+    // Declarando variável que guarda o topo da fila (vértice sendo analisado no BFS)
+    int verticeAtual;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar DFS
+
+    // For de inicialização do DFS
     for (int i = 0; i < n_vertices; i++)
     {
+        // Desmarcando todos os vértices
         vertices[i]->desmarca();
 
+        // Aloca memória para uma tupla e guarda seu ponteiro na lista de tuplas
         listaTupla[i] = (Tupla *)malloc(sizeof(Tupla));
 
+        // Inicializa a tupla definindo o vértice que ela corresponde como i
+        // Ou seja, cada vértice tem sua tupla correspondente
         listaTupla[i]->vertice = i;
     }
-
+    
+    // Definindo o pai da origem do DFS como -1 (pois nenhum vértice o descobre)
     listaTupla[origem]->pai = -1;
+
+    // Botando o ponteiro da tupla do vértice de origem no stack
     S.push(listaTupla[origem]);
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // DFS
+
+    // Enquanto houverem ponteiros no stack, executa DFS
     while (!S.empty())
     {
+        // Definindo tupla a ser analizada como o topo da pilha
         tupla = S.top();
+        
+        // Retirando tupla da pilha
         S.pop();
-        if (vertices[tupla->vertice]->getMarcacao() == 0)
+
+        // Definindo vértice atual como índice gaurdado na tupla ao topo da pilha
+        verticeAtual = tupla->vertice;
+
+        // Se vértice ainda não foi marcado, realizar busca dentro dele
+        if (vertices[verticeAtual]->getMarcacao() == 0)
         {
-            vertices[tupla->vertice]->setPai(tupla->pai);
-            nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
-            vertices[tupla->vertice]->setNivel(nivel);
-            vertices[tupla->vertice]->marca();
+            // O pai é o vértice que botou a tupla na pilha mais recentemente
+            // Se o pai ainda não foi definido, então o último vértice a botar verticeAtual na pilha é o pai
+            // do verticeAtual
+            vertices[verticeAtual]->setPai(tupla->pai);
+
+            // Se o vértice for a origem, definir seu nível como 0. Do contrário seu nível é igual ao nível do pai + 1 
+            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
+            vertices[verticeAtual]->setNivel(nivel);
+            
+            // Marca o vértice sendo analisado
+            vertices[verticeAtual]->marca();
+
+            // Loop para checar vizinhos
             for (i = n_vertices - 1; i >= 0; i--)
             {
-                if (adjacencias[tupla->vertice][i])
+                // Checa se há conexão entre verticeAtual e i
+                if (adjacencias[verticeAtual][i])
                 {
-                    listaTupla[i]->pai = tupla->vertice;
+                    // A tupla que será inserida à pilha (tupla do i) guarda o verticeAtual como seu possível pai
+                    // Ele só será considerado o pai se ele estiver definido como possível pai de i quando i for
+                    // retirado da pilha pela primeira vez
+                    listaTupla[i]->pai = verticeAtual;
+
+                    // Inserindo tupla de i no stack
                     S.push(listaTupla[i]);
                 }
             }
@@ -450,35 +571,63 @@ ListaAdjacencias::ListaAdjacencias(int n)
 
 ListaAdjacencias::ListaAdjacencias(FILE *input)
 {
+    // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
     fscanf(input, "%d", &n_vertices);
+
+    // Inicializa o número de arestas como 0
     n_arestas = 0;
+
+    // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
+    // Com isso conseguimos guardar características de cada vértice
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
+
+    // Cria uma lista de ponteiros para elementos de classe Lista (tamanho n_vertices))
+    // Com isso conseguimos gaurdar listas encadeadas para vizinhos de cada vértice
     adjacencias = (Lista **)malloc(sizeof(Lista *) * n_vertices);
+    
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma Lista para gaurdar seus vizinhos
     for (int i = 0; i < n_vertices; i++)
     {
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice();
+
+        // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências
         adjacencias[i] = new Lista();
     }
 
+    // Declaração de duas variáveis auxiliares para guardarem os vértices que serão fornecidos pela linha sendo
+    // lida no arquivo
     int v1, v2;
+
+    // Loop de leitura de linhas do arquivo que termina quando recebe EOF (End Of File)
     while (fscanf(input, "%d %d", &v1, &v2) != EOF)
     {
+        // Se o índice de qualquer um dos vértices na linha lida for maior que o n_vertice, descarta-se a informação
+        // e segue a próxima iteração do loop (pŕoxima linha)
         if(v1 > n_vertices || v2 > n_vertices) continue;
+
+        // Caso a condição acima não seja satisfeita, define-se adjacência simétrica entre os dois vértices
         setAdjacencia(v1, v2);
+
+        // Após processar informações da aresta, incrementa-se o valor total de n_arestas
+        n_arestas++;
     }
 }
 
+// Destrutor da Lista de Adjacencias. Libera a memória usada pelo array de vértices e pela própria lista
 ListaAdjacencias::~ListaAdjacencias()
 {
     free(vertices);
     free(adjacencias);
 }
 
+// Retorna número de vértices do grafo
 int ListaAdjacencias::getNVertices()
 {
     return n_vertices;
 }
 
+// Retorna número de arestas do grafo
 int ListaAdjacencias::getNArestas()
 {
     return n_arestas;
@@ -486,52 +635,108 @@ int ListaAdjacencias::getNArestas()
 
 void ListaAdjacencias::setAdjacencia(int v1, int v2)
 {
+    // Adiciona o vértice v2 como vizinho de v1
     adjacencias[v1 - 1]->push(v2 - 1);
+
+    // Adiciona v1 como vizinho de v2
     adjacencias[v2 - 1]->push(v1 - 1);
+
+    // Considerando que agora v1 possui um vizinho a mais, incrementa-se seu grau
     vertices[v1 - 1]->incrementaGrau();
+
+    // Considerando que agora v2 possui um vizinho a mais, incrementa-se seu grau
     vertices[v2 - 1]->incrementaGrau();
-    n_arestas++;
 }
 
-void ListaAdjacencias::BFS(int origem, int marcador)
+void ListaAdjacencias::BFS(int origem)
 {
-    int v;
-    if (marcador == 1)
-    {
-        for (int i = 0; i < n_vertices; i++)
-        {
-            vertices[i]->desmarca();
-        }
-    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis locais
+
+    // Variável que guarda o vértice sendo analizado no momento dentro do BFS
+    int verticeAtual;
+
+    // Variável auxiliar para acessar pListaAdjacencias->indice
+    int verticeVizinho;
+
+    // Declaração da fila que será usada para selecionar próximo vértice
     queue<int> Q;
+
+    // Variável auxiliar que guarda o nível do vértice atual
     int nivel;
-    vertices[origem]->marca(marcador);
+
+    // Declarando ponteiro para percorrer a lista de adjacência
+    ListNode* pListaAdjacencias;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar BFS
+
+    for (int i = 0; i < n_vertices; i++)
+    {
+        // Desmarcando todos os vértices
+        vertices[i]->desmarca();
+    }
+
+    // Marcando vértice inicial como visitado
+    vertices[origem]->marca();
+
+    // Inserindo vértice na fila
     Q.push(origem);
+
+    // Definindo o nível da raiz do BFS como 0 e seu pai como -1
     vertices[origem]->setNivel(0);
     vertices[origem]->setPai(-1);
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
+    // Enquanto existirem vértices na fila, executar BFS
     while (!Q.empty())
     {
-        v = Q.front();
+        // Definindo vértice atual como topo da fila
+        verticeAtual = Q.front();
+        
+        // Retirando a cabeça da fila
         Q.pop();
-        ListNode *w = adjacencias[v]->getInicio();
-        while (w != NULL)
+
+        // Apontando pListaAdjacencias para o início da lista de adjacência
+        pListaAdjacencias = adjacencias[verticeAtual]->getInicio();
+        
+        // Executar até percorrer todos os vértices vizinhos
+        while (pListaAdjacencias != NULL)
         {
-            if (vertices[w->indice]->getMarcacao() == 0)
+            // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
+            // sendo apontado no momento
+            verticeVizinho = pListaAdjacencias->indice;
+
+            // Se o vértice apontado por pListaAdjacencias não estiver marcado, continuar
+            if (vertices[verticeVizinho]->getMarcacao() == 0)
             {
-                vertices[w->indice]->marca(marcador);
-                nivel = vertices[v]->getNivel() + 1;
-                vertices[w->indice]->setNivel(nivel);
-                vertices[w->indice]->setPai(v);
-                Q.push(w->indice);
+                // Marca o vértice vizinho sendo analisado
+                vertices[verticeVizinho]->marca();
+
+                // Seta seu nível como o nivel de seu pai (v) + 1
+                nivel = vertices[verticeAtual]->getNivel() + 1;
+                vertices[verticeVizinho]->setNivel(nivel);
+
+                // O pai do vizinho sendo analisado é igual ao vértice que saiu da fila mais recentemente
+                vertices[verticeVizinho]->setPai(verticeAtual);
+
+                // Adiciona o vizinho na fila
+                Q.push(verticeVizinho);
             }
-            w = w->prox;
+
+            // Define o ponteiro para o próximo vizinho a ser analizado
+            pListaAdjacencias = pListaAdjacencias->prox;
         }
     }
 }
 
 void ListaAdjacencias::DFS(int origem)
 {
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Declaração de variáveis locais
@@ -548,8 +753,17 @@ void ListaAdjacencias::DFS(int origem)
     // Criando variável iterável do DFS
     Tupla *tupla;
 
-    // Variável que auxiliar para guardar o nível de profundidade atual da DFS
+    // Variável auxiliar para guardar o nível de profundidade atual da DFS
     int nivel;
+
+    // Declarando variável que guarda o topo da fila (vértice sendo analisado no BFS)
+    int verticeAtual;
+
+    // Variável auxiliar para acessar pListaAdjacencias->indice
+    int verticeVizinho;
+
+    // Declarando ponteiro para percorrer a lista de adjacência
+    ListNode* pListaAdjacencias;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -588,36 +802,44 @@ void ListaAdjacencias::DFS(int origem)
         // Retirando tupla da pilha
         S.pop();
 
+        // Definindo vértice atual como índice gaurdado na tupla ao topo da pilha
+        verticeAtual = tupla->vertice;
+
         // Se vértice ainda não foi marcado, realizar busca dentro dele
-        if (vertices[tupla->vertice]->getMarcacao() == 0)
+        if (vertices[verticeAtual]->getMarcacao() == 0)
         {
             // O pai é o vértice que botou a tupla na pilha mais recentemente
             // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
-            vertices[tupla->vertice]->setPai(tupla->pai);
+            vertices[verticeAtual]->setPai(tupla->pai);
 
             // Se o vértice for a origem, definir seu nível como 0. Do contrário seu nível é igual ao nível do pai + 1 
-            nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
-            vertices[tupla->vertice]->setNivel(nivel);
+            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
+            vertices[verticeAtual]->setNivel(nivel);
 
             // Marca o vértice sendo analisado
-            vertices[tupla->vertice]->marca();
+            vertices[verticeAtual]->marca();
 
-            // Criando um ponteiro para lista de adjacências e apontando-o para o final da lista
+            // Apontando o ponteiro da lista de adjacências para o final da lista
             // Assim garantimos que os elementos são postos do maior pro menor
-            ListNode *w = adjacencias[tupla->vertice]->getFim();
+            pListaAdjacencias = adjacencias[verticeAtual]->getFim();
             
             // Iterando sobre todos elementos da lista vizinhos e adicionando-os à pilha
-            while (w != NULL)
+            while (pListaAdjacencias != NULL)
             {
-                // A tupla que será inserida à pilha (tupla de w->indice) guarda o vértice atual (tupla->vertice) como seu possível pai
-                // Ele só será considerado o pai se ele estiver definido como possível pai de w->indice quando w->indice for tirado da pilha pela primeira vez
-                listaTupla[w->indice]->pai = tupla->vertice;
+                // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
+                // sendo apontado no momento
+                verticeVizinho = pListaAdjacencias->indice;
 
-                // Inserindo tupla do vizinho (w->indice) no stack
-                S.push(listaTupla[w->indice]);
+                // A tupla que será inserida à pilha (tupla do vérticeVizinho) guarda o verticeAtual como seu possível pai
+                // Ele só será considerado o pai se ele estiver definido como possível pai de verticeVizinho quando verticeVizinho for
+                // retirado da pilha pela primeira vez
+                listaTupla[verticeVizinho]->pai = verticeAtual;
 
-                // Próximo elemento da lista de adjacências a ser analisado é o elemento anterior ao w* atual
-                w = w->prev;
+                // Inserindo tupla do verticeVizinho no stack
+                S.push(listaTupla[verticeVizinho]);
+
+                // Próximo elemento da lista de adjacências a ser analisado é o elemento anterior ao apontado no momento
+                pListaAdjacencias = pListaAdjacencias->prev;
             }
         }
     }
@@ -639,6 +861,9 @@ int ListaAdjacencias::componentesConexos()
     // Criando ponteiro para o elemento da lista encadeada a ser analisado no momento
     ListNode* no;
 
+    // Declarando ponteiro para percorrer a lista de adjacência    
+    ListNode* pListaAdjacencias;
+
     // Declarando fila a ser usada no BFS
     queue<int> Q;
 
@@ -648,14 +873,25 @@ int ListaAdjacencias::componentesConexos()
     // Variável que guarda o vértice de origem da BFS
     int origem;
 
+    // Declarando variável que guarda o topo da fila (vértice sendo analisado no BFS)
+    int verticeAtual;
+
+    // Variável auxiliar para acessar pListaAdjacencias->indice
+    int verticeVizinho;
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Preparando para executar BFS
 
     for (int i = 0; i < n_vertices; i++)
     {
+        // Desmarcando todos os vértices
         vertices[i]->desmarca();
+
+        // Inserindo vértice desmarcado na lista de desmarcados e retornando um ponteiro para o elemento adicionado
         no = desmarcados.push(i);
+        
+        // Inserindo ponteiro ao elemento adicionado para lista de ponteiros
         indices[i] = no;
     }
 
@@ -677,39 +913,40 @@ int ListaAdjacencias::componentesConexos()
 
         // Inserindo o vértice na fila
         Q.push(origem);
-
-        // Declarando variável que guarda o topo da fila (vértice sendo analisado)
-        int v;
         
         while (!Q.empty())
         {
             // Retirando topo da fila e guardando em uma variável para uso no algoritmo
-            v = Q.front();
+            verticeAtual = Q.front();
 
             // Retirando o primeiro elemento da fila (v)
             Q.pop();
             
             // Criando um ponteiro para lista de adjacências e apontando-o para o início da lista
-            ListNode *w = adjacencias[v]->getInicio();
+            pListaAdjacencias = adjacencias[verticeAtual]->getInicio();
             
             // Enquanto houverem vizinhos, adicioná-los à fila
-            while (w != NULL)
+            while (pListaAdjacencias != NULL)
             {
+                // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
+                // sendo apontado no momento
+                verticeVizinho = pListaAdjacencias->indice;
+
                 // Se o vértice não foi marcado (visitado)
-                if (vertices[w->indice]->getMarcacao() == 0)
+                if (vertices[verticeVizinho]->getMarcacao() == 0)
                 {
                     // Marca-se o vértice
-                    vertices[w->indice]->marca(marcador);
+                    vertices[verticeVizinho]->marca(marcador);
                     
                     // Retira o vértice da lista de desmarcados
-                    desmarcados.erase(indices[w->indice]);
+                    desmarcados.erase(indices[verticeVizinho]);
                     
                     // Insere o vértice na fila
-                    Q.push(w->indice);
+                    Q.push(verticeVizinho);
                 }
 
                 // Próximo elemento da lista de adjacências a ser analisado é o elemento posterior ao w* atual
-                w = w->prox;
+                pListaAdjacencias = pListaAdjacencias->prox;
             }
         }
 

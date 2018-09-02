@@ -102,7 +102,7 @@ class MatrizAdjacencias: public Grafo{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem, int marcador=1);
+        void BFS(int origem);
         void DFS(int origem);
 
         int componentesConexos();
@@ -123,7 +123,7 @@ class ListaAdjacencias: public Grafo{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem, int marcador=1);
+        void BFS(int origem);
         void DFS(int origem);
 
         int componentesConexos();
