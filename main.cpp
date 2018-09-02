@@ -38,7 +38,7 @@ int main(){
 	} */
     FILE* pFile;
 
-    pFile = fopen("live_journal.txt", "r");
+    pFile = fopen("grafo_teste.txt", "r");
 
     ListaAdjacencias lista(pFile);
 

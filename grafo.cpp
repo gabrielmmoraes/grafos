@@ -595,24 +595,28 @@ void ListaAdjacencias::DFS(int origem)
             // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
             vertices[tupla->vertice]->setPai(tupla->pai);
 
-            // Se o pai do vértice 
+            // Se o vértice for a origem, definir seu nível como 0. Do contrário seu nível é igual ao nível do pai + 1 
             nivel = vertices[tupla->vertice]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
-
-            // Nível do vértice é igual ao nível do pai +1
             vertices[tupla->vertice]->setNivel(nivel);
 
-            // Marca o vértice com o número de sua componente conexa
+            // Marca o vértice sendo analisado
             vertices[tupla->vertice]->marca();
-            // Definindo lista vizinhos como lista de vértices adjacentes de tupla->vertice
-            // Iterando sobre todos elementos da lista vizinhos e adicionando-os à pilha
+
+            // Criando um ponteiro para lista de adjacências e apontando-o para o final da lista
+            // Assim garantimos que os elementos são postos do maior pro menor
             ListNode *w = adjacencias[tupla->vertice]->getFim();
+            
+            // Iterando sobre todos elementos da lista vizinhos e adicionando-os à pilha
             while (w != NULL)
             {
-                // A tupla guarda o vértice tupla->vertice como possível pai de w
-                // Ele só será definido como pai se ele estiver definido como pai de w quando w for tirado da pilha pela primeira vez
+                // A tupla que será inserida à pilha (tupla de w->indice) guarda o vértice atual (tupla->vertice) como seu possível pai
+                // Ele só será considerado o pai se ele estiver definido como possível pai de w->indice quando w->indice for tirado da pilha pela primeira vez
                 listaTupla[w->indice]->pai = tupla->vertice;
-                // Inserindo tupla do vizinho no stack
+
+                // Inserindo tupla do vizinho (w->indice) no stack
                 S.push(listaTupla[w->indice]);
+
+                // Próximo elemento da lista de adjacências a ser analisado é o elemento anterior ao w* atual
                 w = w->prev;
             }
         }
@@ -621,45 +625,108 @@ void ListaAdjacencias::DFS(int origem)
 
 int ListaAdjacencias::componentesConexos()
 {
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis
+
+    // Criando lista de desmarcados
+    // A classe Lista implementa uma lista duplamente encadeada (ListNode)
     Lista desmarcados;
+
+    // Criando lista de ponteiros para elementos de uma lista duplamente encadeada
     ListNode **indices = (ListNode**) malloc(sizeof(ListNode*)*n_vertices);
+    
+    // Criando ponteiro para o elemento da lista encadeada a ser analisado no momento
     ListNode* no;
+
+    // Declarando fila a ser usada no BFS
+    queue<int> Q;
+
+    // Variável marcador que diferencia a componente conexa que algoritmo está computando no momento
+    int marcador = 1;
+
+    // Variável que guarda o vértice de origem da BFS
+    int origem;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar BFS
+
     for (int i = 0; i < n_vertices; i++)
     {
         vertices[i]->desmarca();
         no = desmarcados.push(i);
         indices[i] = no;
     }
-    queue<int> Q;
-    int marcador = 1;
-    int origem = 0;
+
+    // Definindo origem da primeira iteração como vértice de índice 0
+    origem = 0;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
+    // Executar enquanto houver vértices desmarcados
     while (!desmarcados.vazia())
     {
+        // Marcando o vértice sendo analisado
         vertices[origem]->marca(marcador);
+
+        // Retirando o vértice sendo analisado da lista de desmarcados
         desmarcados.erase(indices[origem]);
+
+        // Inserindo o vértice na fila
         Q.push(origem);
+
+        // Declarando variável que guarda o topo da fila (vértice sendo analisado)
         int v;
+        
         while (!Q.empty())
         {
+            // Retirando topo da fila e guardando em uma variável para uso no algoritmo
             v = Q.front();
+
+            // Retirando o primeiro elemento da fila (v)
             Q.pop();
+            
+            // Criando um ponteiro para lista de adjacências e apontando-o para o início da lista
             ListNode *w = adjacencias[v]->getInicio();
+            
+            // Enquanto houverem vizinhos, adicioná-los à fila
             while (w != NULL)
             {
+                // Se o vértice não foi marcado (visitado)
                 if (vertices[w->indice]->getMarcacao() == 0)
                 {
+                    // Marca-se o vértice
                     vertices[w->indice]->marca(marcador);
+                    
+                    // Retira o vértice da lista de desmarcados
                     desmarcados.erase(indices[w->indice]);
+                    
+                    // Insere o vértice na fila
                     Q.push(w->indice);
                 }
+
+                // Próximo elemento da lista de adjacências a ser analisado é o elemento posterior ao w* atual
                 w = w->prox;
             }
         }
 
+        // Pega o primeiro elemento da lista de desmarcados
         no = desmarcados.getInicio();
+
+        // Se nó for igual a NULL, a lista está vazia
+        // Com isso o algoritmo pode ser finalizado
         if(!no) break;
+
+        // Próximo vértice a ser analizado é igual ao número guardado dentro da lista sendo apontada
         origem = no->indice;
+
+        // Incrementando o identificador da componente conexa (pois achamos outra componente)
         marcador++;
     }
+
+    // Retorna o número de componentes conexas
     return marcador;
 }
