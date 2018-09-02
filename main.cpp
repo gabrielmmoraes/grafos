@@ -38,16 +38,17 @@ int main(){
 	} */
     FILE* pFile;
 
-    pFile = fopen("live_journal.txt", "r");
+    pFile = fopen("grafo_teste.txt", "r");
 
-    ListaAdjacencias lista(pFile);
+    MatrizAdjacencias lista(pFile);
 
-    int oi =lista.componentesConexos();
+    //int oi = lista.componentesConexos();
+	lista.DFS(0);
 
-/*     for(int i=0; i<lista.getNVertices(); i++){
-        printf("CC do vertice %d é %d\n", i+1, lista.getVertices()[i]->getMarcacao());
-    }  */
+     for(int i=0; i<lista.getNVertices(); i++){
+        printf("Pai do vertice %d é %d\n", i+1, lista.getVertices()[i]->getPai()+1);
+    }  
 
     // Apresentação dos resultados
-    printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tCC: %d\n", lista.getNVertices(), lista.getNArestas(), oi);
+    //printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tCC: %d\n", lista.getNVertices(), lista.getNArestas(), oi);
 }

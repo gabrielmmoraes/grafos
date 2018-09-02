@@ -8,10 +8,17 @@
 using namespace std;
 
 // Definindo Tupla para marcação de vértice pai
-  typedef struct Tupla{
-     int vertice;
-     int pai;
-  } Tupla;
+  class Tupla{
+      public:
+        Tupla();
+        Tupla(int e1, int e2);
+        ~Tupla();
+
+        bool operator >(Tupla t);
+        bool operator <(Tupla t);
+        int elem1;
+        int elem2;
+  };
 
 typedef struct ListNode{
     ListNode* prev;
@@ -127,7 +134,8 @@ class ListaAdjacencias: public Grafo{
         void BFS(int origem);
         void DFS(int origem);
 
-        int componentesConexos();
+        vector<Tupla> componentesConexos();
+        void analiseComponentesConexos();
         
     protected:
     private:

@@ -9,6 +9,24 @@
 
 using namespace std;
 
+Tupla::Tupla(){
+}
+
+Tupla::Tupla(int e1, int e2){
+    elem1 = e1;
+    elem2 = e2;
+}
+
+Tupla::~Tupla(){}
+
+bool Tupla::operator>(Tupla t){
+    return elem2>t.elem2?elem2:t.elem2;
+}
+
+bool Tupla::operator <(Tupla t){
+    return elem2<t.elem2?elem2:t.elem2;
+}
+
 // Inicializa lista vazia
 Lista::Lista()
 {
@@ -250,6 +268,7 @@ int Grafo::getGrauMediano(){
 
 }
 
+
 // Retorna lista de ponteiros para os vértices do grafo
 Vertice** Grafo::getVertices(){
     return vertices;
@@ -479,11 +498,11 @@ void MatrizAdjacencias::DFS(int origem)
 
         // Inicializa a tupla definindo o vértice que ela corresponde como i
         // Ou seja, cada vértice tem sua tupla correspondente
-        listaTupla[i]->vertice = i;
+        listaTupla[i]->elem1 = i;
     }
     
     // Definindo o pai da origem do DFS como -1 (pois nenhum vértice o descobre)
-    listaTupla[origem]->pai = -1;
+    listaTupla[origem]->elem2 = -1;
 
     // Botando o ponteiro da tupla do vértice de origem no stack
     S.push(listaTupla[origem]);
@@ -502,7 +521,7 @@ void MatrizAdjacencias::DFS(int origem)
         S.pop();
 
         // Definindo vértice atual como índice gaurdado na tupla ao topo da pilha
-        verticeAtual = tupla->vertice;
+        verticeAtual = tupla->elem1;
 
         // Se vértice ainda não foi marcado, realizar busca dentro dele
         if (vertices[verticeAtual]->getMarcacao() == 0)
@@ -510,10 +529,10 @@ void MatrizAdjacencias::DFS(int origem)
             // O pai é o vértice que botou a tupla na pilha mais recentemente
             // Se o pai ainda não foi definido, então o último vértice a botar verticeAtual na pilha é o pai
             // do verticeAtual
-            vertices[verticeAtual]->setPai(tupla->pai);
+            vertices[verticeAtual]->setPai(tupla->elem2);
 
             // Se o vértice for a origem, definir seu nível como 0. Do contrário seu nível é igual ao nível do pai + 1 
-            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
+            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->elem2]->getNivel() + 1 : 0;
             vertices[verticeAtual]->setNivel(nivel);
             
             // Marca o vértice sendo analisado
@@ -528,7 +547,7 @@ void MatrizAdjacencias::DFS(int origem)
                     // A tupla que será inserida à pilha (tupla do i) guarda o verticeAtual como seu possível pai
                     // Ele só será considerado o pai se ele estiver definido como possível pai de i quando i for
                     // retirado da pilha pela primeira vez
-                    listaTupla[i]->pai = verticeAtual;
+                    listaTupla[i]->elem2 = verticeAtual;
 
                     // Inserindo tupla de i no stack
                     S.push(listaTupla[i]);
@@ -586,13 +605,14 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
             }
         }
 
+        t.elem1 = marcador;
+        t.elem2 = tamanho;
+        tamanhos.push_back(t);
+
         no = desmarcados.getInicio();
         if(!no) break;
         origem = no->indice;
-        t.vertice = marcador;
-        t.pai = tamanho;
         marcador++;
-        tamanhos.push_back(t);
     }
     return tamanhos;
 }
@@ -603,6 +623,16 @@ void MatrizAdjacencias::analiseComponentesConexos(){
     vector<Tupla> ccs = componentesConexos();
     make_heap(ccs.begin(),ccs.end());
     while(!ccs.empty()){
+        t = ccs.front();
+        pop_heap(ccs.begin(),ccs.end());
+        ccs.pop_back();
+        printf("Componente conexa %d:\n",t.elem1);
+        for(int i=0;i<n_vertices;i++){
+            if(vertices[i]->getMarcacao()==t.elem1){
+                printf("Vértice %d\n",i+1);
+            }
+        }
+        sort_heap(ccs.begin(),ccs.end());
     }
 }
 
@@ -834,11 +864,11 @@ void ListaAdjacencias::DFS(int origem)
 
         // Inicializa a tupla definindo o vértice que ela corresponde como i
         // Ou seja, cada vértice tem sua tupla correspondente
-        listaTupla[i]->vertice = i;
+        listaTupla[i]->elem1 = i;
     }
 
     // Definindo o pai da origem do DFS como -1 (pois nenhum vértice o descobre)
-    listaTupla[origem]->pai = -1;
+    listaTupla[origem]->elem2 = -1;
 
     // Botando o ponteiro da tupla do vértice de origem no stack
     S.push(listaTupla[origem]);
@@ -857,17 +887,17 @@ void ListaAdjacencias::DFS(int origem)
         S.pop();
 
         // Definindo vértice atual como índice gaurdado na tupla ao topo da pilha
-        verticeAtual = tupla->vertice;
+        verticeAtual = tupla->elem1;
 
         // Se vértice ainda não foi marcado, realizar busca dentro dele
         if (vertices[verticeAtual]->getMarcacao() == 0)
         {
             // O pai é o vértice que botou a tupla na pilha mais recentemente
             // Se o pai ainda não foi definido, então o último vértice a botar tupla->vertice na pilha é o pai de tupla->vertice
-            vertices[verticeAtual]->setPai(tupla->pai);
+            vertices[verticeAtual]->setPai(tupla->elem2);
 
             // Se o vértice for a origem, definir seu nível como 0. Do contrário seu nível é igual ao nível do pai + 1 
-            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->pai]->getNivel() + 1 : 0;
+            nivel = vertices[verticeAtual]->getPai() != -1 ? vertices[tupla->elem2]->getNivel() + 1 : 0;
             vertices[verticeAtual]->setNivel(nivel);
 
             // Marca o vértice sendo analisado
@@ -887,7 +917,7 @@ void ListaAdjacencias::DFS(int origem)
                 // A tupla que será inserida à pilha (tupla do vérticeVizinho) guarda o verticeAtual como seu possível pai
                 // Ele só será considerado o pai se ele estiver definido como possível pai de verticeVizinho quando verticeVizinho for
                 // retirado da pilha pela primeira vez
-                listaTupla[verticeVizinho]->pai = verticeAtual;
+                listaTupla[verticeVizinho]->elem2 = verticeAtual;
 
                 // Inserindo tupla do verticeVizinho no stack
                 S.push(listaTupla[verticeVizinho]);
@@ -900,7 +930,7 @@ void ListaAdjacencias::DFS(int origem)
 }
 
 // Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs
-int ListaAdjacencias::componentesConexos()
+vector<Tupla> ListaAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -908,6 +938,9 @@ int ListaAdjacencias::componentesConexos()
 
     // Criando lista de desmarcados
     // A classe Lista implementa uma lista duplamente encadeada (ListNode)
+    Tupla t;
+    vector<Tupla> tamanhos;
+    int tamanho;
     Lista desmarcados;
 
     // Criando lista de ponteiros para elementos de uma lista duplamente encadeada
@@ -962,7 +995,7 @@ int ListaAdjacencias::componentesConexos()
     {
         // Marcando o vértice sendo analisado
         vertices[origem]->marca(marcador);
-
+        tamanho = 1;
         // Retirando o vértice sendo analisado da lista de desmarcados
         desmarcados.erase(indices[origem]);
 
@@ -992,7 +1025,7 @@ int ListaAdjacencias::componentesConexos()
                 {
                     // Marca-se o vértice
                     vertices[verticeVizinho]->marca(marcador);
-                    
+                    tamanho++;
                     // Retira o vértice da lista de desmarcados
                     desmarcados.erase(indices[verticeVizinho]);
                     
@@ -1004,6 +1037,10 @@ int ListaAdjacencias::componentesConexos()
                 pListaAdjacencias = pListaAdjacencias->prox;
             }
         }
+
+        t.elem1 = marcador;
+        t.elem2 = tamanho;
+        tamanhos.push_back(t);
 
         // Pega o primeiro elemento da lista de desmarcados
         no = desmarcados.getInicio();
@@ -1020,5 +1057,23 @@ int ListaAdjacencias::componentesConexos()
     }
 
     // Retorna o número de componentes conexas
-    return marcador;
+    return tamanhos;
+}
+
+void ListaAdjacencias::analiseComponentesConexos(){
+    Tupla t;
+    vector<Tupla> ccs = componentesConexos();
+    make_heap(ccs.begin(),ccs.end());
+    while(!ccs.empty()){
+        t = ccs.front();
+        pop_heap(ccs.begin(),ccs.end());
+        ccs.pop_back();
+        printf("Componente conexa %d:\n",t.elem1);
+        for(int i=0;i<n_vertices;i++){
+            if(vertices[i]->getMarcacao()==t.elem1){
+                printf("Vértice %d\n",i+1);
+            }
+        }
+        sort_heap(ccs.begin(),ccs.end());
+    }
 }
