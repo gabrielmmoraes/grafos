@@ -879,6 +879,7 @@ void ListaAdjacencias::DFS(int origem)
     }
 }
 
+// Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs
 int ListaAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
