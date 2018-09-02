@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <list>
+#include<vector>
 
 using namespace std;
 
@@ -104,7 +105,8 @@ class MatrizAdjacencias: public Grafo{
         void BFS(int origem);
         void DFS(int origem);
 
-        int componentesConexos();
+        vector<Tupla> componentesConexos();
+        void analiseComponentesConexos();
 
     protected:
     private:

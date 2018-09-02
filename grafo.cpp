@@ -2,6 +2,8 @@
 #include <list>
 #include <queue>
 #include <stack>
+#include <vector>
+#include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -536,14 +538,15 @@ void MatrizAdjacencias::DFS(int origem)
     }
 }
 
-// Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs
-int MatrizAdjacencias::componentesConexos()
+// Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
+vector<Tupla> MatrizAdjacencias::componentesConexos()
 {
+    Tupla t;
     Lista desmarcados;
     ListNode **indices = (ListNode **)malloc(sizeof(ListNode *) * n_vertices);
     ListNode *no;
 
-    Lista tamanhos;
+    vector<Tupla> tamanhos;
     int tamanho;
 
     for (int i = 0; i < n_vertices; i++)
@@ -586,10 +589,21 @@ int MatrizAdjacencias::componentesConexos()
         no = desmarcados.getInicio();
         if(!no) break;
         origem = no->indice;
+        t.vertice = marcador;
+        t.pai = tamanho;
         marcador++;
-        tamanhos.push(tamanho);
+        tamanhos.push_back(t);
     }
-    return marcador;
+    return tamanhos;
+}
+
+//Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
+void MatrizAdjacencias::analiseComponentesConexos(){
+    Tupla t;
+    vector<Tupla> ccs = componentesConexos();
+    make_heap(ccs.begin(),ccs.end());
+    while(!ccs.empty()){
+    }
 }
 
 ListaAdjacencias::ListaAdjacencias(int n)
