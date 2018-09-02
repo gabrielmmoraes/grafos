@@ -206,6 +206,7 @@ Grafo::Grafo(){}
 
 Grafo::~Grafo(){}
 
+// Retorna o grau mínimo do grafo
 int Grafo::getGrauMin(){
     int min = n_vertices;
     int grau;
@@ -219,6 +220,7 @@ int Grafo::getGrauMin(){
     return min;
 }
 
+// Retorna o grau máximo do grafo
 int Grafo::getGrauMax(){
     int max = 0;
     int grau;
@@ -232,6 +234,7 @@ int Grafo::getGrauMax(){
     return max;
 }
 
+// Retorna o grau médio do grafo
 int Grafo::getGrauMedio(){
     int acum = 0;
 
@@ -240,10 +243,12 @@ int Grafo::getGrauMedio(){
     return acum/n_vertices;
 }
 
+// Retorna o grau mediano do grafo
 int Grafo::getGrauMediano(){
 
 }
 
+// Retorna lista de ponteiros para os vértices do grafo
 Vertice** Grafo::getVertices(){
     return vertices;
 }
@@ -265,6 +270,7 @@ MatrizAdjacencias::MatrizAdjacencias(int n)
     }
 }
 
+// Constrói uma matriz de adjacência a partir da descrição de um grafo dentro de um arquivo
 MatrizAdjacencias::MatrizAdjacencias(FILE *input)
 {
     // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
