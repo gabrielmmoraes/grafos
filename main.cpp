@@ -54,7 +54,7 @@ int main(){
 		acum_dfs += duracao;
 	}
 
-	printf("Tempo Médio (1000 observações):\n\tBFS: %ld\n\tDFS: %ld\n\n", acum_bfs/LEITURAS, acum_dfs/LEITURAS);
+	printf("Tempo Médio (1000 observações):\n\tBFS: %ld ms\n\tDFS: %ld ms\n\n", acum_bfs/LEITURAS, acum_dfs/LEITURAS);
 
 	for(int i=0;i<5;i++){
 		grafo.BFS(i);
@@ -63,21 +63,22 @@ int main(){
 			printf("O pai de %d é %d\n",j+1,grafo.getVertices()[j]->getPai()+1);
 		}
 		grafo.DFS(i);
-		printf("DFS a partir de %d:\n",i+1);
+		printf("\nDFS a partir de %d:\n",i+1);
 		for(int j = 9;j<50;j+=10){
 			printf("O pai de %d é %d\n",j+1,grafo.getVertices()[j]->getPai()+1);
 		}
+		printf("\n");
 	}
 
 	Lista** componentes = grafo.analiseComponentesConexos();
 	int quantidade = grafo.componentesConexos().size();
-	int maior = componentes[0]->getInicio()->indice;
-	int menor = componentes[quantidade-1]->getInicio()->indice;
+	int maior = componentes[0]->getTamanho();
+	int menor = componentes[quantidade-1]->getTamanho();
 	printf("O grafo possui %d componentes conexas.\n A maior tem tamanho %d.\n A menor tem tamanho %d\n\n",quantidade,maior,menor);
 
 	printf("Grau mínimo: %d\nGrau máximo: %d\nGrau médio: %f\nMediana do grau: %f\n\n",grafo.getGrauMin(),grafo.getGrauMax(),grafo.getGrauMedio(),grafo.getGrauMediano(	));
     
-	printf("Diâmetro do grafo(se -1, grafo não é conexo): %d\n",grafo.diametro());
+	//printf("Diâmetro do grafo(se -1, grafo não é conexo): %d\n",grafo.diametro());
 	// Apresentação dos resultados
     //printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tMediana: %.2f\n", lista.getNVertices(), lista.getNArestas(), lista.getGrauMediano());
 }

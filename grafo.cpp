@@ -1152,11 +1152,9 @@ Lista** ListaAdjacencias::analiseComponentesConexos()
         componentesConexas[c] = new Lista();
         componentesConexas[c]->push(t.elem1);
 
-        printf("Componente conexa %d:\n",t.elem1);
         for(int i=0;i<n_vertices;i++){
             if(vertices[i]->getMarcacao()==t.elem1){
                 componentesConexas[c]->push(i);
-                printf("Vértice %d\n",i+1);
             }
         }
         sort_heap(ccs.begin(),ccs.end());
