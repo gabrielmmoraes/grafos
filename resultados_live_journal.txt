@@ -1,8 +1,0 @@
-Análise do grafo com Lista de Adjacência:
-
-Construindo Lista de Adjacência (20693 ms)
-
-Tempo Médio (1 observações):
-	BFS: 9037 ms
-	DFS: 23366 ms
-

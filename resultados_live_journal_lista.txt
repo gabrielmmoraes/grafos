@@ -1,0 +1,89 @@
+Análise do grafo com Lista de Adjacência:
+
+Construindo Lista de Adjacência (21862 ms)
+
+Tempo Médio (10 observações):
+	BFS: 6855 ms
+	DFS: 21369 ms
+
+BFS a partir de 1:
+O pai de 10 é 1
+O pai de 20 é 1
+O pai de 30 é 1
+O pai de 40 é 1
+O pai de 50 é 1
+
+DFS a partir de 1:
+O pai de 10 é 16
+O pai de 20 é 601249
+O pai de 30 é 28
+O pai de 40 é 84
+O pai de 50 é 49
+
+BFS a partir de 2:
+O pai de 10 é 1
+O pai de 20 é 1
+O pai de 30 é 1
+O pai de 40 é 1
+O pai de 50 é 1
+
+DFS a partir de 2:
+O pai de 10 é 16
+O pai de 20 é 601249
+O pai de 30 é 28
+O pai de 40 é 84
+O pai de 50 é 49
+
+BFS a partir de 3:
+O pai de 10 é 1
+O pai de 20 é 1
+O pai de 30 é 1
+O pai de 40 é 1
+O pai de 50 é 1
+
+DFS a partir de 3:
+O pai de 10 é 16
+O pai de 20 é 601249
+O pai de 30 é 3296
+O pai de 40 é 84
+O pai de 50 é 49
+
+BFS a partir de 4:
+O pai de 10 é 1
+O pai de 20 é 1
+O pai de 30 é 1
+O pai de 40 é 1
+O pai de 50 é 1
+
+DFS a partir de 4:
+O pai de 10 é 16
+O pai de 20 é 601249
+O pai de 30 é 3296
+O pai de 40 é 84
+O pai de 50 é 49
+
+BFS a partir de 5:
+O pai de 10 é 1
+O pai de 20 é 1
+O pai de 30 é 1
+O pai de 40 é 1
+O pai de 50 é 1
+
+DFS a partir de 5:
+O pai de 10 é 16
+O pai de 20 é 601249
+O pai de 30 é 3296
+O pai de 40 é 84
+O pai de 50 é 49
+
+O grafo possui 29221 componentes conexas.
+ A maior tem tamanho 3968730.
+ A menor tem tamanho 2.
+
+Número de vértices: 3997962
+Número de Arestas: 34614288
+Grau mínimo: 0
+Grau máximo: 14762
+Grau médio: 17.05
+Mediana do grau: 6.00
+
