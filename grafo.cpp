@@ -255,7 +255,7 @@ int Grafo::getGrauMax(){
 
 // Retorna o grau médio do grafo
 float Grafo::getGrauMedio(){
-    int acum = 0;
+    float acum = 0;
 
     for(int i=0; i<n_vertices;i++)  acum+=vertices[i]->getGrau();    
 
@@ -264,7 +264,7 @@ float Grafo::getGrauMedio(){
 
 // Retorna o grau mediano do grafo
 float Grafo::getGrauMediano(){
-    vector<int> graus;
+    vector<float> graus;
     for(int i = 0; i<n_vertices; i++){
         graus.push_back(vertices[i]->getGrau());
     }
@@ -387,8 +387,8 @@ void MatrizAdjacencias::setAdjacencia(int v1, int v2)
     vertices[v2 - 1]->incrementaGrau();
 }
 
-// Busca em largura a partir de um vértice origem
-void MatrizAdjacencias::BFS(int origem)
+// Busca em largura a partir de um vértice origem, retorna o maior nível
+int MatrizAdjacencias::BFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -429,7 +429,7 @@ void MatrizAdjacencias::BFS(int origem)
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // BFS
-
+    int maiornivel = 0;
     while (!Q.empty())
     {
         // Definindo vértice atual como topo da fila
@@ -451,6 +451,7 @@ void MatrizAdjacencias::BFS(int origem)
 
                     // Define o nível como o nível do pai (verticeAtual) + 1
                     nivel = vertices[verticeAtual]->getNivel() + 1;
+                    maiornivel = nivel>maiornivel?nivel:maiornivel;
                     vertices[i]->setNivel(nivel);
 
                     // Define o pai como o verticeAtual
@@ -462,6 +463,7 @@ void MatrizAdjacencias::BFS(int origem)
             }
         }
     }
+    return maiornivel;
 }
 
 // Busca em profundidade a partir de um vértice origem
@@ -563,6 +565,20 @@ void MatrizAdjacencias::DFS(int origem)
     }
 }
 
+//Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
+int MatrizAdjacencias::diametro(){
+    int diametro = 0;
+    int tmp;
+    if(componentesConexos().size()>1) return -1;
+
+    for(int i=0;i<n_vertices;i++){
+        tmp = BFS(i);
+        diametro = tmp>diametro?tmp:diametro;
+    }
+
+    return diametro;
+}
+
 // Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
 vector<Tupla> MatrizAdjacencias::componentesConexos()
 {
@@ -661,6 +677,7 @@ Lista** MatrizAdjacencias::analiseComponentesConexos()
     return componentesConexas;
 }
 
+
 ListaAdjacencias::ListaAdjacencias(int n)
 {
     n_vertices = n;
@@ -756,7 +773,7 @@ void ListaAdjacencias::setAdjacencia(int v1, int v2)
 }
 
 // Busca em largura a partir de um vértice origem
-void ListaAdjacencias::BFS(int origem)
+int ListaAdjacencias::BFS(int origem)
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -802,6 +819,7 @@ void ListaAdjacencias::BFS(int origem)
     // BFS
 
     // Enquanto existirem vértices na fila, executar BFS
+    int maiornivel = 0;
     while (!Q.empty())
     {
         // Definindo vértice atual como topo da fila
@@ -828,6 +846,7 @@ void ListaAdjacencias::BFS(int origem)
 
                 // Seta seu nível como o nivel de seu pai (v) + 1
                 nivel = vertices[verticeAtual]->getNivel() + 1;
+                maiornivel = nivel>maiornivel?nivel:maiornivel;
                 vertices[verticeVizinho]->setNivel(nivel);
 
                 // O pai do vizinho sendo analisado é igual ao vértice que saiu da fila mais recentemente
@@ -841,6 +860,7 @@ void ListaAdjacencias::BFS(int origem)
             pListaAdjacencias = pListaAdjacencias->prox;
         }
     }
+    return maiornivel;
 }
 
 // Busca em profundidade a partir de um vértice origem
@@ -952,6 +972,20 @@ void ListaAdjacencias::DFS(int origem)
             }
         }
     }
+}
+
+//Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
+int ListaAdjacencias::diametro(){
+    int diametro = 0;
+    int tmp;
+    if(componentesConexos().size()>1) return -1;
+
+    for(int i=0;i<n_vertices;i++){
+        tmp = BFS(i);
+        diametro = tmp>diametro?tmp:diametro;
+    }
+
+    return diametro;
 }
 
 // Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs

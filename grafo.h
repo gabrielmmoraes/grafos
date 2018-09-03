@@ -109,11 +109,14 @@ class MatrizAdjacencias: public Grafo{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem);
+        int BFS(int origem);
         void DFS(int origem);
+
+        int diametro();
 
         vector<Tupla> componentesConexos();
         Lista** analiseComponentesConexos();
+
 
     protected:
     private:
@@ -131,8 +134,10 @@ class ListaAdjacencias: public Grafo{
 
         void setAdjacencia(int v1, int v2);
 
-        void BFS(int origem);
+        int BFS(int origem);
         void DFS(int origem);
+        
+        int diametro();
 
         vector<Tupla> componentesConexos();
         Lista** analiseComponentesConexos();
