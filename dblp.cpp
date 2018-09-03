@@ -22,7 +22,7 @@ int main(){
 
     FILE* pFile;
 
-    pFile = fopen("as_graph.txt", "r");
+    pFile = fopen("dblp.txt", "r");
 
 	long inicio, fim, acum_bfs = 0, acum_dfs = 0;
 

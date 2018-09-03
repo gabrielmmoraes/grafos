@@ -28,17 +28,17 @@ int main(){
 
 	double duracao;
 
-	printf("Análise do grafo com Lista de Adjacência:\n\n");
+	printf("Análise do grafo com Matriz de Adjacência:\n\n");
 	
 	inicio = getMicrotime();
 
-    ListaAdjacencias grafo(pFile);
+    MatrizAdjacencias grafo(pFile);
 
 	fim = getMicrotime();
 
 	duracao = (fim-inicio) / 1000;
 
-	printf("Construindo Lista de Adjacência (%.0lf ms)\n\n", duracao);
+	printf("Construindo Matriz de Adjacência (%.0lf ms)\n\n", duracao);
     
 	for(i = 0; i<LEITURAS; i++){
 		inicio = getMicrotime();
