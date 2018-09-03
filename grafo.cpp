@@ -563,6 +563,11 @@ void MatrizAdjacencias::DFS(int origem)
             }
         }
     }
+    for (i = 0; i < n_vertices; i++)
+    {
+        free(listaTupla[i]);
+    }
+    free(listaTupla);
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
@@ -641,6 +646,7 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
         origem = no->indice;
         marcador++;
     }
+    free(indices);
     return tamanhos;
 }
 
@@ -970,6 +976,12 @@ void ListaAdjacencias::DFS(int origem)
             }
         }
     }
+
+    for (i = 0; i < n_vertices; i++)
+    {
+        free(listaTupla[i]);
+    }
+    free(listaTupla);
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
@@ -1126,6 +1138,8 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
         // Incrementando o identificador da componente conexa (pois achamos outra componente)
         marcador++;
     }
+
+    free(indices);
 
     // Retorna o número de componentes conexas
     return tamanhos;

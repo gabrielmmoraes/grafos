@@ -16,7 +16,7 @@ long getMicrotime(){
 
 int main(){
 
-	const int LEITURAS = 1;
+	const int LEITURAS = 1000;
 
 	int i;
 
@@ -35,7 +35,7 @@ int main(){
 	
 	inicio = getMicrotime();
 
-    MatrizAdjacencias grafo(pFileIn);
+    ListaAdjacencias grafo(pFileIn);
 
 	fim = getMicrotime();
 
