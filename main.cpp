@@ -22,7 +22,7 @@ int main(){
 
     FILE* pFile;
 
-    pFile = fopen("as_graph.txt", "r");
+    pFile = fopen("dblp.txt", "r");
 
 	long inicio, fim, acum_bfs = 0, acum_dfs = 0;
 
@@ -54,7 +54,7 @@ int main(){
 		acum_dfs += duracao;
 	}
 
-	printf("Tempo Médio (1000 observações):\n\tBFS: %ld ms\n\tDFS: %ld ms\n\n", acum_bfs/LEITURAS, acum_dfs/LEITURAS);
+	printf("Tempo Médio (%d observações):\n\tBFS: %ld ms\n\tDFS: %ld ms\n\n",LEITURAS, acum_bfs/LEITURAS, acum_dfs/LEITURAS);
 
 	for(int i=0;i<5;i++){
 		grafo.BFS(i);
@@ -78,7 +78,7 @@ int main(){
 
 	printf("Grau mínimo: %d\nGrau máximo: %d\nGrau médio: %f\nMediana do grau: %f\n\n",grafo.getGrauMin(),grafo.getGrauMax(),grafo.getGrauMedio(),grafo.getGrauMediano(	));
     
-	//printf("Diâmetro do grafo(se -1, grafo não é conexo): %d\n",grafo.diametro());
+	//printf("Diâmetro do grafo(-1 se o grafo for disconexo): %d\n",grafo.diametro());
 	// Apresentação dos resultados
     //printf("Resultados:\n\tVértices: %u\n\tArestas: %u\n\tMediana: %.2f\n", lista.getNVertices(), lista.getNArestas(), lista.getGrauMediano());
 }
