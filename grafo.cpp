@@ -11,18 +11,25 @@ using namespace std;
 
 Tupla::Tupla(){}
 
-Tupla::Tupla(int e1, int e2){
+// Overload de construtor da Tupla
+// Inicializa tupla com os dois parâmetros passados
+Tupla::Tupla(int e1, int e2)
+{
     elem1 = e1;
     elem2 = e2;
 }
 
 Tupla::~Tupla(){}
 
-bool Tupla::operator>(Tupla t){
+// Overload de operador criado para a Tupla poder ser usada no heap do STL
+bool Tupla::operator>(Tupla t)
+{
     return elem2 > t.elem2 ? elem2 : t.elem2;
 }
 
-bool Tupla::operator <(Tupla t){
+// Overload de operador criado para a Tupla poder ser usada no heap do STL
+bool Tupla::operator <(Tupla t)
+{
     return elem2 < t.elem2 ? elem2 : t.elem2;
 }
 
@@ -37,69 +44,141 @@ Lista::Lista()
 // Libera memória usada pela lista
 Lista::~Lista()
 {
+    // Define ponteiro para o início da lista
     ListNode *no = inicio;
-    if(inicio){
+
+    // Se o início não for NULL, ou seja, se a lista não estiver vazia
+    if(inicio)
+    {
+        // Loop que percorre a lista até o último elemento
         while (inicio->prox != NULL)
         {
+            // Atribui elemento do início da lista ao nó
             no = inicio;
+
+            // Novo início da lista é o próximo elemento
             inicio = inicio->prox;
+
+            // Deleta nó
             free(no);
         }
+
+        // Deleta último elemento da lista
         free(inicio);
     }
 }
 
+// Função que adiciona elemento ao final da lista encadeada
 ListNode *Lista::push(int i)
 {
+    // Aloca memória para o nó a ser adicionado
     ListNode *no = (ListNode *)malloc(sizeof(ListNode));
+
+    // Inicializa o nó com o índice passado como argumento
     no->indice = i;
+
+    // Define próximo elemento da lista como NULL
+    // pois o elemento a ser adicionado será o último
     no->prox = NULL;
+
+    // Se a lista estiver inicialmente vazia
     if (inicio == NULL)
     {
+        // O elemento anterior o que será adicionado é NULL
         no->prev = NULL;
+
+        // O ponteiro de inicio da lista passa a apontar para o nó
         inicio = no;
     }
+
+    // Caso a lista não esteja inicialmente vazia
     else
     {
+        // O elemento anterior ao nó é o atual elemento final da lista
         no->prev = fim;
+
+        // O elemento próximo ao final da lista passa a ser o nó adicionado
         fim->prox = no;
     }
+    
+    // Define novo final da lista como o nó criado
     fim = no;
+    
+    // Incrementa tamanho da lista
     tamanho++;
 
+    // Retorna ponteiro para o nó criado
     return no;
 }
 
+// Função que deleta o elemento da lista apontado pelo parâmetro
 void Lista::erase(ListNode *no)
 {
+    // Se o elemento a ser deleta for o último da lista
     if (no==inicio && no==fim)
     {
+        // Definimos início e fim da lista como NULL
         inicio = NULL;
         fim = NULL;
+
+        // Decrementa tamanho
         tamanho--;
+
+        // Libera memória usada pelo elemento deletado
         free(no);
+
+        // Finaliza a execução da função
         return;
     }
     
+    // Se o nó for o primeiro da lista
     if (no==inicio)
     {
+        // Aponta o ponteiro inicio para o elemento posterior ao que será deletado
         inicio = no->prox;
+
+        // Aponta o ponteiro prev do nó posterior para NULL
+        // pois ele passa a ser o primeiro elemento
         no->prox->prev == NULL;
+
+        // Decrementa tamanho
         tamanho--;
+
+        // Libera memória usada pelo elemento deletado
         free(no);
+
+        // Finaliza a execução da função
         return;
     }
+
+    // Se o nó for o último da lista
     if (no==fim)
     {
+        // Aponta o ponteiro fim para o elemento anterior ao que será deletado
         fim = no->prev;
+
+        // Aponta o ponteiro prox do nó anterior para NULL
+        // pois ele passa a ser o último elemento
         no->prev->prox == NULL;
+        
+        // Decrementa tamanho        
         tamanho--;
+
+        // Libera memória usada pelo elemento deletado
         free(no);
+
+        // Finaliza a execução da função
         return;
     }
-    no->prev->prox = no->prox;
+    
+    // Redefine ponteiros dos nós anterior e próximo
+    no->prev->prox = no->prox;    
     no->prox->prev = no->prev;
+
+    // Decrementa tamanho
     tamanho--;
+
+    // Libera memória usada pelo elemento deletado
     free(no);
 }
 
@@ -110,7 +189,8 @@ bool Lista::vazia()
 }
 
 // Retorna tamanho da lista
-int Lista::getTamanho(){
+int Lista::getTamanho()
+{
     return tamanho;
 }
 
@@ -226,70 +306,123 @@ Grafo::Grafo(){}
 Grafo::~Grafo(){}
 
 // Retorna o grau mínimo do grafo
-int Grafo::getGrauMin(){
+int Grafo::getGrauMin()
+{
+    // Variável que armazena o menor valor encontrado
+    // Inicializada como n_vertices, pois nenhum vértice terá grau maior do que n_vertices - 1
     int min = n_vertices;
+
+    // Variável auxiliar para armazenar o grau do vértice sendo analisado
     int grau;
 
-    for(int i=0; i<n_vertices;i++){
+    // Loop para cada vértice
+    for(int i=0; i<n_vertices;i++)
+    {
+        // Grau recebe o grau do vértice sendo analisado
         grau = vertices[i]->getGrau();
+
+        // Se grau for igual a zero, temos o grau mínimo
         if(!grau) return grau;
+
+        // Se grau for menor que o grau mínimo achado até o momento, atribuímos grau à variável min
         min = grau < min ? grau : min;
     }
 
+    // Retorna menor variável encontrada até o momento
     return min;
 }
 
 // Retorna o grau máximo do grafo
-int Grafo::getGrauMax(){
+int Grafo::getGrauMax()
+{
+    // Variável que armazena maior valor encontrado
     int max = 0;
+
+    // Variável auxiliar para armazenar o grau do vértice sendo analisado
     int grau;
 
-    for(int i=0; i<n_vertices;i++){
+    // Loop para cada vértice
+    for(int i=0; i<n_vertices;i++)
+    {
+        // Grau recebe o grau do vértice sendo analisado
         grau = vertices[i]->getGrau();
+
+        // Se grau for igual a n_vertices - 1, temos o maior grau possível do grafo
         if(grau==n_vertices-1) return grau;
+
+        // Se grau for maior que max, atribui-se o valor de grau a max
         max = grau > max ? grau : max;
     }
 
+    // Retorna maior grau encontrado
     return max;
 }
 
 // Retorna o grau médio do grafo
-float Grafo::getGrauMedio(){
+float Grafo::getGrauMedio()
+{
+    // Variável auxiliar para armazenar soma dos graus
     float acum = 0;
 
+    // Para cada vértice, soma-se seu grau ao acumulador
     for(int i=0; i<n_vertices;i++)  acum+=vertices[i]->getGrau();    
 
+    // Retorna o valor do acumulador dividido pelo número de vértices
     return acum/n_vertices;
 }
 
 // Retorna o grau mediano do grafo
-float Grafo::getGrauMediano(){
+float Grafo::getGrauMediano()
+{
+
+    // Cria vetor de floats para armazenar graus de cada vértice
+    // É inicializado como float para facilitar o cálculo da mediana
     vector<float> graus;
+
+    // Para cada vértice, inserimos seu grau no vetor
     for(int i = 0; i<n_vertices; i++){
         graus.push_back(vertices[i]->getGrau());
     }
 
+    // Sort de complexidade nlogn realizado no vetor de graus
     sort(graus.begin(), graus.end());
 
+    // Retorna a mediana do vetor
+    // Considerando o caso em que n_vertices é par (média dos dois elementos centrais)
+    // ou ímpar (valor do elemento central)
     return n_vertices % 2 == 1 ? graus[n_vertices/2] : (graus[n_vertices/2] + graus[n_vertices/2 + 1]) / 2;
 }
 
-
 // Retorna lista de ponteiros para os vértices do grafo
-Vertice** Grafo::getVertices(){
+Vertice** Grafo::getVertices()
+{
     return vertices;
 }
 
+// Construtor de matriz de adjacência a partir de um número de vértices
+// Ainda é preciso chamar setAdjacencia pela main a fim de criar as arestas e relações entre vértices
 MatrizAdjacencias::MatrizAdjacencias(int n)
 {
+    // Define n_vertices como o argumento passado
     n_vertices = n;
+
+    // Inicializa n_arestas como 0
     n_arestas = 0;
+
+    // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
     adjacencias = (int **)malloc(sizeof(int *) * n_vertices);
+    
+    // Para cada n_vertice, inicializa-se uma classe Vertice aloca-se memória para uma linha da matriz
     for (int i = 0; i < n_vertices; i++)
     {
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice();
+
+        // Alocando memória para uma linha da matriz de tamanho n_vertices
         adjacencias[i] = (int *)malloc(sizeof(int) * n_vertices);
+
+        // Inicializando linha como 0
         for (int j = 0; j < n_vertices; j++)
         {
             adjacencias[i][j] = 0;
@@ -563,22 +696,46 @@ void MatrizAdjacencias::DFS(int origem)
             }
         }
     }
+
+    // Loop para liberar todas as tuplas apontadas pelos ponteiros de listaTupla
     for (i = 0; i < n_vertices; i++)
     {
         free(listaTupla[i]);
     }
+
+    // Libera memória da listaTupla
     free(listaTupla);
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
-int MatrizAdjacencias::diametro(){
+int MatrizAdjacencias::diametro()
+{
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis
+
+    // Declaração de variável a ser comparada
     int diametro = 0;
+    
+    // Declarando variável acumuladora
     int tmp;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
+    // Checa se há mais de uma componente conexa
+    // Caso tenha, o diâmetro é infinito
     if(componentesConexos().size()>1) return -1;
 
-    for(int i=0;i<n_vertices;i++){
+    // Roda n_vertices BFS e guarda o valor do maior nível alcançado (diâmetro do grafo)
+    for(int i=0;i<n_vertices;i++)
+    {
+        // Executa BFS em i e guarda seu maior nível
         tmp = BFS(i);
-        diametro = tmp>diametro?tmp:diametro;
+
+        // Compara tmp com o maior diâmetro encontrado até o momento
+        diametro = tmp > diametro ? tmp : diametro;
     }
 
     return diametro;
@@ -587,45 +744,110 @@ int MatrizAdjacencias::diametro(){
 // Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
 vector<Tupla> MatrizAdjacencias::componentesConexos()
 {
-    Tupla t;
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis
+
+    // Criando lista de desmarcados
+    // A classe Lista implementa uma lista duplamente encadeada (ListNode)    
     Lista desmarcados;
+   
+    // Declaração de tupla auxiliar
+    // Cada tupla armazena os identificadores da componente conexa e seus respectivos tamanhos
+    Tupla t;
+
+    // Vetor de tuplas
+    vector<Tupla> tamanhos;
+
+    // Variável auxiliar para definir tamanho da componente conexa
+    int tamanho;
+
+    // Criando lista de ponteiros para elementos de uma lista duplamente encadeada
     ListNode **indices = (ListNode **)malloc(sizeof(ListNode *) * n_vertices);
+
+    // Criando ponteiro para o elemento da lista encadeada a ser analisado no momento
     ListNode *no;
 
-    vector<Tupla> tamanhos;
-    int tamanho;
+    // Declarando fila a ser usada no BFS
+    queue<int> Q;
+
+    // Variável marcador que diferencia a componente conexa que algoritmo está computando no momento
+    int marcador = 1;
+    
+    // Variável que guarda o vértice de origem da BFS
+    int origem ;
+
+    // Declarando variável que guarda o topo da fila (vértice sendo analisado no BFS)
+    int verticeAtual;
+
+    // Variável iteradora do for
+    int i;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Preparando para executar BFS
 
     for (int i = 0; i < n_vertices; i++)
     {
+        // Desmarcando todos os vértices
         vertices[i]->desmarca();
+
+        // Inserindo vértice desmarcado na lista de desmarcados e retornando um ponteiro para o elemento adicionado
         no = desmarcados.push(i);
+
+        // Inserindo ponteiro ao elemento adicionado para lista de ponteiros
         indices[i] = no;
     }
 
-    queue<int> Q;
-    int marcador = 1;
-    int origem = 0;
+    // Definindo origem da primeira iteração como vértice de índice 0
+    origem = 0;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
+    // Executar enquanto houver vértices desmarcados
     while (!desmarcados.vazia())
     {
+        // Marcando o vértice sendo analisado
         vertices[origem]->marca(marcador);
+        
+        // Inicializando tamanho da componente conexa como 1        
         tamanho = 1;
+
+        // Retirando o vértice sendo analisado da lista de desmarcados
         desmarcados.erase(indices[origem]);
+
+        // Inserindo o vértice na fila
         Q.push(origem);
-        int v;
-        int i;
+
         while (!Q.empty())
         {
-            v = Q.front();
+            // Retirando topo da fila e guardando em uma variável para uso no algoritmo
+            verticeAtual = Q.front();
+
+            // Retirando o primeiro elemento da fila (v)
             Q.pop();
+            
+            // Para cada vértice
             for (i = 0; i < n_vertices; i++)
             {
-                if (adjacencias[v][i])
+                // Checa se há relação entre verticeAtual e i
+                if (adjacencias[verticeAtual][i])
                 {
+                    // Checa se i foi marcado
                     if (vertices[i]->getMarcacao() == 0)
                     {
+                        // Marca vértice i
                         vertices[i]->marca(marcador);
+
+                        // Incrementa tamanho da componente conexa
                         tamanho++;
+
+                        // Retira i da lista de desmarcados
                         desmarcados.erase(indices[i]);
+
+                        // Insere i na fila
                         Q.push(i);
                     }
                 }
@@ -641,56 +863,102 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
         // Inserindo tupla no final do vetor
         tamanhos.push_back(t);
 
+        // Pega o primeiro elemento da lista de desmarcados
         no = desmarcados.getInicio();
+
+        // Se nó for igual a NULL, a lista está vazia
+        // Com isso o algoritmo pode ser finalizado
         if(!no) break;
+        
+        // Próximo vértice a ser analizado é igual ao número guardado dentro da lista sendo apontada        
         origem = no->indice;
+
+        // Incrementando o identificador da componente conexa (pois achamos outra componente)
         marcador++;
     }
+
+    // Liberando memória do ponteiro índice (ponteiro para lista de Listas)
     free(indices);
+
+    // Retorna vetor de Tuplas com todas as componentes conexas e seus tamanhos
     return tamanhos;
 }
 
 //Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
 Lista** MatrizAdjacencias::analiseComponentesConexos()
 {
+    //Declara a tupla que será retirada da heap
     Tupla t;
+
+    //Acha todas as componentes conexas
     vector<Tupla> ccs = componentesConexos();
+
+    //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
+    
+    //Inicia o contador de componentes
     int c = 0;
 
+    //Função padrão para transformar o vector em heapmax 
     make_heap(ccs.begin(),ccs.end());
     
+    //Enquanto a heap não estiver vazia
     while(!ccs.empty()){
     
+        //Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
         t = ccs.front();
+
+        //Remove essa tupla da heap
         pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
     
+        //Inicia a lista para a componente conexa c
         componentesConexas[c] = new Lista();
+
+        //Define o primeiro elemento da lista como o identificador da componente
         componentesConexas[c]->push(t.elem1);
 
-        for(int i=0;i<n_vertices;i++){
+        //Para todos os vértices marcados com o identificador da componente
+        for(int i=0;i<n_vertices;i++)
+        {
             if(vertices[i]->getMarcacao()==t.elem1){
+                //Insere o identificador do vértice na lista
                 componentesConexas[c]->push(i);
             }
         }
+
+        //Reordena a heap (move a próxima componente conexa para o topo da heap)
         sort_heap(ccs.begin(),ccs.end());
+
+        //Incrementa o contador de componentes
         c++;
     }
 
+    //Retorna o vetor de listas de componentes em ordem decrescente
     return componentesConexas;
 }
 
-
+// Construtor de lista de adjacência a partir de um número de vértices
+// Ainda é preciso chamar setAdjacencia pela main a fim de criar as arestas e relações entre vértices
 ListaAdjacencias::ListaAdjacencias(int n)
 {
+    // Define n_vertices como o argumento passado
     n_vertices = n;
+
+    // Inicializa n_arestas como 0
     n_arestas = 0;
+
+    // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
     adjacencias = (Lista **)malloc(sizeof(Lista *) * n_vertices);
+    
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma Lista para guardar seus vizinhos
     for (int i = 0; i < n_vertices; i++)
     {
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice();
+
+        // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências
         adjacencias[i] = new Lista();
     }
 }
@@ -712,7 +980,7 @@ ListaAdjacencias::ListaAdjacencias(FILE *input)
     // Com isso conseguimos gaurdar listas encadeadas para vizinhos de cada vértice
     adjacencias = (Lista **)malloc(sizeof(Lista *) * n_vertices);
     
-    // Para cada n_vertice, inicializa-se uma classe Vertice e uma Lista para gaurdar seus vizinhos
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma Lista para guardar seus vizinhos
     for (int i = 0; i < n_vertices; i++)
     {
         // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
@@ -864,6 +1132,8 @@ int ListaAdjacencias::BFS(int origem)
             pListaAdjacencias = pListaAdjacencias->prox;
         }
     }
+
+    // Retorna maiornivel para cálculo do diâmetro
     return maiornivel;
 }
 
@@ -977,28 +1247,52 @@ void ListaAdjacencias::DFS(int origem)
         }
     }
 
+    // Loop para liberar todas as tuplas apontadas pelos ponteiros de listaTupla
     for (i = 0; i < n_vertices; i++)
     {
         free(listaTupla[i]);
     }
+
+    // Libera memória da listaTupla
     free(listaTupla);
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
-int ListaAdjacencias::diametro(){
+int ListaAdjacencias::diametro()
+{
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Declaração de variáveis
+
+    // Declaração de variável a ser comparada
     int diametro = 0;
+    
+    // Declarando variável acumuladora
     int tmp;
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // BFS
+
+    // Checa se há mais de uma componente conexa
+    // Caso tenha, o diâmetro é infinito
     if(componentesConexos().size()>1) return -1;
 
-    for(int i=0;i<n_vertices;i++){
+    // Roda n_vertices BFS e guarda o valor do maior nível alcançado (diâmetro do grafo)
+    for(int i=0;i<n_vertices;i++)
+    {
+        // Executa BFS em i e guarda seu maior nível
         tmp = BFS(i);
-        diametro = tmp>diametro?tmp:diametro;
+
+        // Compara tmp com o maior diâmetro encontrado até o momento
+        diametro = tmp > diametro ? tmp : diametro;
     }
 
+    // Retorna diâmetro do grafo
     return diametro;
 }
 
-// Função que percorre todas componentes conexas do grafo e retorna a quantidade de CCs
+// Função que percorre todas componentes conexas do grafo, as ordena dentro de um vetor e retorna a quantidade de CCs
 vector<Tupla> ListaAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1010,10 +1304,15 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
     Lista desmarcados;
 
 
+    // Declaração de tupla auxiliar
+    // Cada tupla armazena os identificadores da componente conexa e seus respectivos tamanhos
     Tupla t;
-    vector<Tupla> tamanhos;
-    int tamanho;
 
+    // Vetor de tuplas
+    vector<Tupla> tamanhos;
+    
+    // Variável auxiliar para definir tamanho da componente conexa
+    int tamanho;
 
     // Criando lista de ponteiros para elementos de uma lista duplamente encadeada
     ListNode **indices = (ListNode**) malloc(sizeof(ListNode*)*n_vertices);
@@ -1139,39 +1438,66 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
         marcador++;
     }
 
+    // Liberando memória do ponteiro índice (ponteiro para lista de Listas)
     free(indices);
 
-    // Retorna o número de componentes conexas
+    // Retorna vetor de Tuplas com todas as componentes conexas e seus tamanhos
     return tamanhos;
 }
 
 //Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
 Lista** ListaAdjacencias::analiseComponentesConexos()
 {
+    //Declara a tupla que será retirada da heap
     Tupla t;
+
+    //Acha todas as componentes conexas
     vector<Tupla> ccs = componentesConexos();
+   
+    //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
+   
+    //Inicia o contador de componentes
     int c = 0;
 
+    //Função padrão para transformar o vector em heapmax 
     make_heap(ccs.begin(),ccs.end());
-    
+
+    //Enquanto a heap não estiver vazia
     while(!ccs.empty()){
-    
+  
+        //Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
         t = ccs.front();
+    
+        //Remove essa tupla da heap
         pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
-    
+  
+        //Inicia a lista para a componente conexa c
         componentesConexas[c] = new Lista();
+       
+        //Define o primeiro elemento da lista como o identificador da componente
         componentesConexas[c]->push(t.elem1);
 
-        for(int i=0;i<n_vertices;i++){
+        //Para todos os vértices marcados com o identificador da componente
+        for(int i=0;i<n_vertices;i++)
+        {
             if(vertices[i]->getMarcacao()==t.elem1){
+                //Insere o identificador do vértice na lista
                 componentesConexas[c]->push(i);
             }
         }
+        
+        //Reordena a heap (move a próxima componente conexa para o topo da heap)
         sort_heap(ccs.begin(),ccs.end());
+       
+        //Incrementa o contador de componentes
         c++;
     }
-
+   
+    //Retorna o vetor de listas de componentes em ordem decrescente
     return componentesConexas;
 }
+
+// Se leu até aqui você é um fã de verdade!
+// Não se esqueça de curtir o repositório e seguir o canal no GitHub
