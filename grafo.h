@@ -1,150 +1,118 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
-#include <iostream>
-#include <list>
-#include<vector>
+#include <stdio.h>
+#include <vector>
+#include "tupla.h"
+#include "lista.h"
 
 using namespace std;
 
-// Definindo Tupla para marcação de vértice pai
-  class Tupla{
-      public:
-        Tupla();
-        Tupla(int e1, int e2);
-        ~Tupla();
+class Vertice
+{
+  public:
+    Vertice();
 
-        bool operator >(Tupla t);
-        bool operator <(Tupla t);
-        int elem1;
-        int elem2;
-  };
+    int getGrau();
+    int getPai();
+    int getNivel();
+    int getMarcacao();
 
-typedef struct ListNode{
-    ListNode* prev;
-    int indice;
-    ListNode* prox;
-} ListNode;
+    void incrementaGrau();
+    void setPai(int v);
+    void setNivel(int n);
+    void desmarca();
+    void marca(int i = 1);
 
-class Lista{
-    public:
-        Lista();
-        ~Lista();
-
-        ListNode* push(int i);
-        void erase(ListNode* no);
-
-        bool vazia();
-        int getTamanho();
-
-        ListNode* getInicio();
-        ListNode* getFim();
-    protected:
-    private:
-        int tamanho;
-        ListNode* inicio;
-        ListNode* fim;
+  protected:
+  private:
+    int grau;
+    int marcacao;
+    int pai;
+    int nivel;
 };
 
-class Vertice{
-    public:
-        Vertice();
-        
-        int getGrau();
-        int getPai();
-        int getNivel();
-        int getMarcacao();
+class Aresta
+{
+  public:
+    Aresta(int v1, int v2);
+    ~Aresta();
+    Vertice *getVertice(int v);
 
-        void incrementaGrau();
-        void setPai(int v);
-        void setNivel(int n);
-        void desmarca();
-        void marca(int i=1);
-    protected:
-    private:
-        int grau;
-        int marcacao;
-        int pai;
-        int nivel;
-        
+  protected:
+  private:
+    Vertice *v[2];
 };
 
-class Aresta{
-    public:
-        Aresta(int v1, int v2);
-        ~Aresta();
-        Vertice* getVertice(int v);
-    protected:
-    private:
-        Vertice *v[2];
+class Grafo
+{
+  public:
+    Grafo();
+    ~Grafo();
+
+    int getGrauMin();
+    int getGrauMax();
+    float getGrauMedio();
+    float getGrauMediano();
+
+    Vertice **getVertices();
+
+  protected:
+    int n_vertices;
+    int n_arestas;
+    Vertice **vertices;
+
+  private:
 };
 
-class Grafo{
-    public:
-        Grafo();
-        ~Grafo();
+class MatrizAdjacencias : public Grafo
+{
+  public:
+    MatrizAdjacencias(int n);
+    ~MatrizAdjacencias();
+    MatrizAdjacencias(FILE *input);
 
-        int getGrauMin();
-        int getGrauMax();
-        float getGrauMedio();
-        float getGrauMediano();
+    int getNVertices();
+    int getNArestas();
 
-        Vertice** getVertices();
+    void setAdjacencia(int v1, int v2);
 
-    protected:
-        int n_vertices;
-        int n_arestas;
-        Vertice** vertices;
-    private:
+    int BFS(int origem);
+    void DFS(int origem);
+
+    int diametro();
+
+    vector<Tupla> componentesConexos();
+    Lista **analiseComponentesConexos();
+
+  protected:
+  private:
+    int **adjacencias;
 };
 
-class MatrizAdjacencias: public Grafo{
-    public:
-        MatrizAdjacencias(int n);
-        ~MatrizAdjacencias();
-        MatrizAdjacencias(FILE* input);
+class ListaAdjacencias : public Grafo
+{
+  public:
+    ListaAdjacencias(int n);
+    ~ListaAdjacencias();
+    ListaAdjacencias(FILE *input);
 
-        int getNVertices();
-        int getNArestas();
+    int getNVertices();
+    int getNArestas();
 
-        void setAdjacencia(int v1, int v2);
+    void setAdjacencia(int v1, int v2);
 
-        int BFS(int origem);
-        void DFS(int origem);
+    int BFS(int origem);
+    void DFS(int origem);
 
-        int diametro();
+    int diametro();
 
-        vector<Tupla> componentesConexos();
-        Lista** analiseComponentesConexos();
+    vector<Tupla> componentesConexos();
+    Lista **analiseComponentesConexos();
 
-
-    protected:
-    private:
-        int **adjacencias;
-};
-
-class ListaAdjacencias: public Grafo{
-    public:
-        ListaAdjacencias(int n);
-        ~ListaAdjacencias();
-        ListaAdjacencias(FILE *input);
-
-        int getNVertices();
-        int getNArestas();
-
-        void setAdjacencia(int v1, int v2);
-
-        int BFS(int origem);
-        void DFS(int origem);
-        
-        int diametro();
-
-        vector<Tupla> componentesConexos();
-        Lista** analiseComponentesConexos();
-        
-    protected:
-    private:
-        Lista **adjacencias;
+  protected:
+  private:
+    Lista **adjacencias;
 };
 
 #endif //GRAFO_H
