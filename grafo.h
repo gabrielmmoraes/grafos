@@ -1,8 +1,8 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
-#include <stdio.h>
-#include <vector>
+#include <iostream>
+#include<vector>
 #include "tupla.h"
 #include "lista.h"
 
@@ -38,7 +38,6 @@ class Aresta
     Aresta(int v1, int v2);
     ~Aresta();
     Vertice *getVertice(int v);
-
   protected:
   private:
     Vertice *v[2];

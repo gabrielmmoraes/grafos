@@ -3,33 +3,30 @@
 
 using namespace std;
 
-typedef struct ListNode
-{
-    ListNode *prev;
+typedef struct ListNode{
+    ListNode* prev;
     int indice;
-    ListNode *prox;
+    ListNode* prox;
 } ListNode;
 
-class Lista
-{
-  public:
-    Lista();
-    ~Lista();
+class Lista{
+    public:
+        Lista();
+        ~Lista();
 
-    ListNode *push(int i);
-    void erase(ListNode *no);
+        ListNode* push(int i);
+        void erase(ListNode* no);
 
-    bool vazia();
-    int getTamanho();
+        bool vazia();
+        int getTamanho();
 
-    ListNode *getInicio();
-    ListNode *getFim();
-
-  protected:
-  private:
-    int tamanho;
-    ListNode *inicio;
-    ListNode *fim;
+        ListNode* getInicio();
+        ListNode* getFim();
+    protected:
+    private:
+        int tamanho;
+        ListNode* inicio;
+        ListNode* fim;
 };
 
 #endif //LISTA_H
