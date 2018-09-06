@@ -2,49 +2,11 @@
 #define GRAFO_H
 
 #include <iostream>
-#include <list>
 #include<vector>
+#include "tupla.h"
+#include "lista.h"
 
 using namespace std;
-
-// Definindo Tupla para marcação de vértice pai
-  class Tupla{
-      public:
-        Tupla();
-        Tupla(int e1, int e2);
-        ~Tupla();
-
-        bool operator >(Tupla t);
-        bool operator <(Tupla t);
-        int elem1;
-        int elem2;
-  };
-
-typedef struct ListNode{
-    ListNode* prev;
-    int indice;
-    ListNode* prox;
-} ListNode;
-
-class Lista{
-    public:
-        Lista();
-        ~Lista();
-
-        ListNode* push(int i);
-        void erase(ListNode* no);
-
-        bool vazia();
-        int getTamanho();
-
-        ListNode* getInicio();
-        ListNode* getFim();
-    protected:
-    private:
-        int tamanho;
-        ListNode* inicio;
-        ListNode* fim;
-};
 
 class Vertice{
     public:
