@@ -40,13 +40,14 @@ Lista::~Lista()
 
 
 // Função que adiciona elemento ao final da lista encadeada
-ListNode *Lista::push(int i)
+ListNode *Lista::push(int i, float w)
 {
     // Aloca memória para o nó a ser adicionado
     ListNode *no = (ListNode *)malloc(sizeof(ListNode));
 
-    // Inicializa o nó com o índice passado como argumento
-    no->indice = i;
+    // Inicializa o nó com o índice e o peso passados como argumentos
+    no->elemento.elem1 = i;
+    no->elemento.elem2 = w;
 
     // Define próximo elemento da lista como NULL
     // pois o elemento a ser adicionado será o último

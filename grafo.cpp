@@ -203,7 +203,7 @@ Vertice** Grafo::getVertices()
 
 // Construtor de matriz de adjacência a partir de um número de vértices
 // Ainda é preciso chamar setAdjacencia pela main a fim de criar as arestas e relações entre vértices
-MatrizAdjacencias::MatrizAdjacencias(int n)
+MatrizAdjacencias::MatrizAdjacencias(int n, bool p)
 {
     // Define n_vertices como o argumento passado
     n_vertices = n;
@@ -211,9 +211,12 @@ MatrizAdjacencias::MatrizAdjacencias(int n)
     // Inicializa n_arestas como 0
     n_arestas = 0;
 
+    // Inicializa a flag de peso com o argumento passado
+    peso = p;
+
     // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
-    adjacencias = (int **)malloc(sizeof(int *) * n_vertices);
+    adjacencias = (float **)malloc(sizeof(float *) * n_vertices);
     
     // Para cada n_vertice, inicializa-se uma classe Vertice aloca-se memória para uma linha da matriz
     for (int i = 0; i < n_vertices; i++)
@@ -222,7 +225,7 @@ MatrizAdjacencias::MatrizAdjacencias(int n)
         vertices[i] = new Vertice();
 
         // Alocando memória para uma linha da matriz de tamanho n_vertices
-        adjacencias[i] = (int *)malloc(sizeof(int) * n_vertices);
+        adjacencias[i] = (float *)malloc(sizeof(float) * n_vertices);
 
         // Inicializando linha como 0
         for (int j = 0; j < n_vertices; j++)
@@ -233,7 +236,7 @@ MatrizAdjacencias::MatrizAdjacencias(int n)
 }
 
 // Constrói uma matriz de adjacência a partir da descrição de um grafo dentro de um arquivo
-MatrizAdjacencias::MatrizAdjacencias(FILE *input)
+MatrizAdjacencias::MatrizAdjacencias(FILE *input, bool p)
 {
     // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
     fscanf(input, "%d", &n_vertices);
@@ -241,13 +244,16 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input)
     // Inicializa o número de arestas como 0    
     n_arestas = 0;
 
+    // Inicializa a flag de peso com o argumento passado
+    peso = p;
+
     // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
     // Com isso conseguimos guardar características de cada vértice
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
     
     // Cria uma lista de ponteiros para listas, simulando uma matriz de tamanho n_vertice^2
     // Com isso conseguimos acessar a relação entre dois vértices em tempo O(1)
-    adjacencias = (int **)malloc(sizeof(int *) * n_vertices);
+    adjacencias = (float **)malloc(sizeof(float *) * n_vertices);
     
     // Para cada n_vertice, inicializa-se uma classe Vertice e uma linha da matriz de tamanho n_vertice
     for (int i = 0; i < n_vertices; i++)
@@ -256,25 +262,29 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input)
         vertices[i] = new Vertice();
 
         // Cria linha da matriz com tamanho n_vertices e as iniciliza com valor 0
-        adjacencias[i] = (int *)calloc(n_vertices, sizeof(int));
+        adjacencias[i] = (float *)calloc(n_vertices, sizeof(float));
     }
 
     // Declaração de duas variáveis auxiliares para guardarem os vértices que serão fornecidos pela linha sendo
     // lida no arquivo
     int v1, v2;
+    float w = 1;
+    int leitura = 1;
 
     // Loop de leitura de linhas do arquivo que termina quando recebe EOF (End Of File)
-    while (fscanf(input, "%d %d", &v1, &v2) != EOF)
+    while (true)
     {
+        if(p) leitura = fscanf(input, "%d %d %f", &v1, &v2, &w);
+        
+        else leitura = fscanf(input, "%d %d", &v1, &v2);
+
+        if(leitura == EOF) break;
         // Se o índice de qualquer um dos vértices na linha lida for maior que o n_vertice, descarta-se a informação
         // e segue a próxima iteração do loop (pŕoxima linha)
         if(v1 > n_vertices || v2 > n_vertices) continue;
 
         // Caso a condição acima não seja satisfeita, define-se adjacência simétrica entre os dois vértices
-        setAdjacencia(v1, v2);
-
-        // Após processar informações da aresta, incrementa-se o valor total de n_arestas
-        n_arestas++;
+        setAdjacencia(v1, v2, w);
     }
 }
 
@@ -307,19 +317,21 @@ int MatrizAdjacencias::getNArestas()
 }
 
 // Define adjacência entre dois vértices
-void MatrizAdjacencias::setAdjacencia(int v1, int v2)
+void MatrizAdjacencias::setAdjacencia(int v1, int v2, float w)
 {
     // Define o vértice v2 como vizinho de v1
-    adjacencias[v1 - 1][v2 - 1] = 1;
+    adjacencias[v1 - 1][v2 - 1] = w;
 
     // Define o vértice v1 como vizinho de v2
-    adjacencias[v2 - 1][v1 - 1] = 1;
+    adjacencias[v2 - 1][v1 - 1] = w;
 
     // Considerando que agora v1 possui um vizinho a mais, incrementa-se seu grau
     vertices[v1 - 1]->incrementaGrau();
 
     // Considerando que agora v2 possui um vizinho a mais, incrementa-se seu grau
     vertices[v2 - 1]->incrementaGrau();
+
+    n_arestas++;
 }
 
 // Busca em largura a partir de um vértice origem, retorna o maior nível
@@ -416,6 +428,7 @@ void MatrizAdjacencias::DFS(int origem)
 
     // Criando stack de ponteiros para tuplas
     stack<Tupla<int, int> *> S;
+
 
     // Criando variável iterável do DFS
     Tupla<int, int> *tupla;
@@ -544,7 +557,7 @@ int MatrizAdjacencias::diametro()
 }
 
 // Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
-vector<Tupla<int, int>> MatrizAdjacencias::componentesConexos()
+vector<Tupla<int, int> > MatrizAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -559,7 +572,7 @@ vector<Tupla<int, int>> MatrizAdjacencias::componentesConexos()
     Tupla<int, int> t;
 
     // Vetor de tuplas
-    vector<Tupla<int, int>> tamanhos;
+    vector<Tupla<int, int> > tamanhos;
 
     // Variável auxiliar para definir tamanho da componente conexa
     int tamanho;
@@ -673,7 +686,7 @@ vector<Tupla<int, int>> MatrizAdjacencias::componentesConexos()
         if(!no) break;
         
         // Próximo vértice a ser analizado é igual ao número guardado dentro da lista sendo apontada        
-        origem = no->indice;
+        origem = no->elemento.elem1;
 
         // Incrementando o identificador da componente conexa (pois achamos outra componente)
         marcador++;
@@ -693,7 +706,7 @@ Lista** MatrizAdjacencias::analiseComponentesConexos()
     Tupla<int, int> t;
 
     //Acha todas as componentes conexas
-    vector<Tupla<int, int>> ccs = componentesConexos();
+    vector<Tupla<int, int> > ccs = componentesConexos();
 
     //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
@@ -742,13 +755,15 @@ Lista** MatrizAdjacencias::analiseComponentesConexos()
 
 // Construtor de lista de adjacência a partir de um número de vértices
 // Ainda é preciso chamar setAdjacencia pela main a fim de criar as arestas e relações entre vértices
-ListaAdjacencias::ListaAdjacencias(int n)
+ListaAdjacencias::ListaAdjacencias(int n, bool p)
 {
     // Define n_vertices como o argumento passado
     n_vertices = n;
 
     // Inicializa n_arestas como 0
     n_arestas = 0;
+
+    peso = p;
 
     // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
@@ -766,13 +781,15 @@ ListaAdjacencias::ListaAdjacencias(int n)
 }
 
 // Constrói uma lista de adjacência a partir da descrição de um grafo dentro de um arquivo
-ListaAdjacencias::ListaAdjacencias(FILE *input)
+ListaAdjacencias::ListaAdjacencias(FILE *input, bool p)
 {
     // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
     fscanf(input, "%d", &n_vertices);
 
     // Inicializa o número de arestas como 0
     n_arestas = 0;
+
+    peso = p;
 
     // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
     // Com isso conseguimos guardar características de cada vértice
@@ -795,19 +812,23 @@ ListaAdjacencias::ListaAdjacencias(FILE *input)
     // Declaração de duas variáveis auxiliares para guardarem os vértices que serão fornecidos pela linha sendo
     // lida no arquivo
     int v1, v2;
+    float w = 1;
+    int leitura = 1;
 
     // Loop de leitura de linhas do arquivo que termina quando recebe EOF (End Of File)
-    while (fscanf(input, "%d %d", &v1, &v2) != EOF)
+    while (true)
     {
+        if(p) leitura = fscanf(input, "%d %d %f", &v1, &v2, &w);
+        
+        else leitura = fscanf(input, "%d %d", &v1, &v2);
+
+        if(leitura == EOF) break;
         // Se o índice de qualquer um dos vértices na linha lida for maior que o n_vertice, descarta-se a informação
         // e segue a próxima iteração do loop (pŕoxima linha)
         if(v1 > n_vertices || v2 > n_vertices) continue;
 
         // Caso a condição acima não seja satisfeita, define-se adjacência simétrica entre os dois vértices
-        setAdjacencia(v1, v2);
-
-        // Após processar informações da aresta, incrementa-se o valor total de n_arestas
-        n_arestas++;
+        setAdjacencia(v1, v2, w);
     }
 }
 
@@ -831,19 +852,21 @@ int ListaAdjacencias::getNArestas()
 }
 
 // Define adjacência entre dois vértices
-void ListaAdjacencias::setAdjacencia(int v1, int v2)
+void ListaAdjacencias::setAdjacencia(int v1, int v2, float w)
 {
     // Adiciona o vértice v2 como vizinho de v1
-    adjacencias[v1 - 1]->push(v2 - 1);
+    adjacencias[v1 - 1]->push(v2 - 1, w);
 
     // Adiciona v1 como vizinho de v2
-    adjacencias[v2 - 1]->push(v1 - 1);
+    adjacencias[v2 - 1]->push(v1 - 1, w);
 
     // Considerando que agora v1 possui um vizinho a mais, incrementa-se seu grau
     vertices[v1 - 1]->incrementaGrau();
 
     // Considerando que agora v2 possui um vizinho a mais, incrementa-se seu grau
     vertices[v2 - 1]->incrementaGrau();
+
+    n_arestas++;
 }
 
 // Busca em largura a partir de um vértice origem
@@ -910,7 +933,7 @@ int ListaAdjacencias::BFS(int origem)
         {
             // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
             // sendo apontado no momento
-            verticeVizinho = pListaAdjacencias->indice;
+            verticeVizinho = pListaAdjacencias->elemento.elem1;
 
             // Se o vértice apontado por pListaAdjacencias não estiver marcado, continuar
             if (vertices[verticeVizinho]->getMarcacao() == 0)
@@ -1033,7 +1056,7 @@ void ListaAdjacencias::DFS(int origem)
             {
                 // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
                 // sendo apontado no momento
-                verticeVizinho = pListaAdjacencias->indice;
+                verticeVizinho = pListaAdjacencias->elemento.elem1;
 
                 // A tupla que será inserida à pilha (tupla do vérticeVizinho) guarda o verticeAtual como seu possível pai
                 // Ele só será considerado o pai se ele estiver definido como possível pai de verticeVizinho quando verticeVizinho for
@@ -1095,7 +1118,7 @@ int ListaAdjacencias::diametro()
 }
 
 // Função que percorre todas componentes conexas do grafo, as ordena dentro de um vetor e retorna a quantidade de CCs
-vector<Tupla<int, int>> ListaAdjacencias::componentesConexos()
+vector<Tupla<int, int> > ListaAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1111,7 +1134,7 @@ vector<Tupla<int, int>> ListaAdjacencias::componentesConexos()
     Tupla<int, int> t;
 
     // Vetor de tuplas
-    vector<Tupla<int, int>> tamanhos;
+    vector<Tupla<int, int> > tamanhos;
     
     // Variável auxiliar para definir tamanho da componente conexa
     int tamanho;
@@ -1194,7 +1217,7 @@ vector<Tupla<int, int>> ListaAdjacencias::componentesConexos()
             {
                 // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
                 // sendo apontado no momento
-                verticeVizinho = pListaAdjacencias->indice;
+                verticeVizinho = pListaAdjacencias->elemento.elem1;
 
                 // Se o vértice não foi marcado (visitado)
                 if (vertices[verticeVizinho]->getMarcacao() == 0)
@@ -1234,7 +1257,7 @@ vector<Tupla<int, int>> ListaAdjacencias::componentesConexos()
         if(!no) break;
 
         // Próximo vértice a ser analizado é igual ao número guardado dentro da lista sendo apontada
-        origem = no->indice;
+        origem = no->elemento.elem1;
 
         // Incrementando o identificador da componente conexa (pois achamos outra componente)
         marcador++;
@@ -1254,7 +1277,7 @@ Lista** ListaAdjacencias::analiseComponentesConexos()
     Tupla<int, int> t;
 
     //Acha todas as componentes conexas
-    vector<Tupla<int, int>> ccs = componentesConexos();
+    vector<Tupla<int, int> > ccs = componentesConexos();
    
     //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;

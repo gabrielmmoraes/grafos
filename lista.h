@@ -1,11 +1,13 @@
 #ifndef LISTA_H
 #define LISTA_H
 
+#include "tupla.h"
+
 using namespace std;
 
 typedef struct ListNode{
     ListNode* prev;
-    int indice;
+    Tupla<int, float> elemento;
     ListNode* prox;
 } ListNode;
 
@@ -14,7 +16,7 @@ class Lista{
         Lista();
         ~Lista();
 
-        ListNode* push(int i);
+        ListNode* push(int i, float w=0);
         void erase(ListNode* no);
 
         bool vazia();

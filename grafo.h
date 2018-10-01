@@ -57,6 +57,7 @@ class Grafo
     Vertice **getVertices();
 
   protected:
+    bool peso;
     int n_vertices;
     int n_arestas;
     Vertice **vertices;
@@ -67,46 +68,46 @@ class Grafo
 class MatrizAdjacencias : public Grafo
 {
   public:
-    MatrizAdjacencias(int n);
+    MatrizAdjacencias(int n, bool p);
     ~MatrizAdjacencias();
-    MatrizAdjacencias(FILE *input);
+    MatrizAdjacencias(FILE *input, bool p);
 
     int getNVertices();
     int getNArestas();
 
-    void setAdjacencia(int v1, int v2);
+    void setAdjacencia(int v1, int v2, float w);
 
     int BFS(int origem);
     void DFS(int origem);
 
     int diametro();
 
-    vector<Tupla<int, int>> componentesConexos();
+    vector<Tupla<int, int> > componentesConexos();
     Lista **analiseComponentesConexos();
 
   protected:
   private:
-    int **adjacencias;
+    float **adjacencias;
 };
 
 class ListaAdjacencias : public Grafo
 {
   public:
-    ListaAdjacencias(int n);
+    ListaAdjacencias(int n, bool p);
     ~ListaAdjacencias();
-    ListaAdjacencias(FILE *input);
+    ListaAdjacencias(FILE *input, bool p);
 
     int getNVertices();
     int getNArestas();
 
-    void setAdjacencia(int v1, int v2);
+    void setAdjacencia(int v1, int v2, float w);
 
     int BFS(int origem);
     void DFS(int origem);
 
     int diametro();
 
-    vector<Tupla<int, int>> componentesConexos();
+    vector<Tupla<int, int> > componentesConexos();
     Lista **analiseComponentesConexos();
 
   protected:

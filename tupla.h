@@ -5,7 +5,7 @@ using namespace std;
 
 // Definindo Tupla para marcação de vértice pai
 template <class num1, class num2>
-  class Tupla{
+  class Tupla {
       public:
         Tupla();
         Tupla(num1 e1, num2 e2);
@@ -17,4 +17,5 @@ template <class num1, class num2>
         num2 elem2;
   };
 
-  #endif //TUPLA_H
+#include "tupla_impl.h"
+#endif //TUPLA_H
