@@ -81,7 +81,7 @@ class MatrizAdjacencias : public Grafo
 
     int diametro();
 
-    vector<Tupla> componentesConexos();
+    vector<Tupla<int>> componentesConexos();
     Lista **analiseComponentesConexos();
 
   protected:
@@ -106,7 +106,7 @@ class ListaAdjacencias : public Grafo
 
     int diametro();
 
-    vector<Tupla> componentesConexos();
+    vector<Tupla<int>> componentesConexos();
     Lista **analiseComponentesConexos();
 
   protected:

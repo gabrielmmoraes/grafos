@@ -412,13 +412,13 @@ void MatrizAdjacencias::DFS(int origem)
     int i;
 
     // Lista de ponteiros para tuplas
-    Tupla **listaTupla = (Tupla **)malloc(sizeof(Tupla *) * n_vertices);
+    Tupla<int> **listaTupla = (Tupla<int> **)malloc(sizeof(Tupla<int> *) * n_vertices);
 
     // Criando stack de ponteiros para tuplas
-    stack<Tupla *> S;
+    stack<Tupla<int> *> S;
 
     // Criando variável iterável do DFS
-    Tupla *tupla;
+    Tupla<int> *tupla;
 
     // Variável auxiliar para guardar o nível de profundidade atual da DFS
     int nivel;
@@ -437,7 +437,7 @@ void MatrizAdjacencias::DFS(int origem)
         vertices[i]->desmarca();
 
         // Aloca memória para uma tupla e guarda seu ponteiro na lista de tuplas
-        listaTupla[i] = (Tupla *)malloc(sizeof(Tupla));
+        listaTupla[i] = (Tupla<int> *)malloc(sizeof(Tupla<int>));
 
         // Inicializa a tupla definindo o vértice que ela corresponde como i
         // Ou seja, cada vértice tem sua tupla correspondente
@@ -544,7 +544,7 @@ int MatrizAdjacencias::diametro()
 }
 
 // Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
-vector<Tupla> MatrizAdjacencias::componentesConexos()
+vector<Tupla<int>> MatrizAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -556,10 +556,10 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
    
     // Declaração de tupla auxiliar
     // Cada tupla armazena os identificadores da componente conexa e seus respectivos tamanhos
-    Tupla t;
+    Tupla<int> t;
 
     // Vetor de tuplas
-    vector<Tupla> tamanhos;
+    vector<Tupla<int>> tamanhos;
 
     // Variável auxiliar para definir tamanho da componente conexa
     int tamanho;
@@ -690,10 +690,10 @@ vector<Tupla> MatrizAdjacencias::componentesConexos()
 Lista** MatrizAdjacencias::analiseComponentesConexos()
 {
     //Declara a tupla que será retirada da heap
-    Tupla t;
+    Tupla<int> t;
 
     //Acha todas as componentes conexas
-    vector<Tupla> ccs = componentesConexos();
+    vector<Tupla<int>> ccs = componentesConexos();
 
     //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
@@ -950,13 +950,13 @@ void ListaAdjacencias::DFS(int origem)
     int i;
 
     // Lista de ponteiros para tuplas
-    Tupla **listaTupla = (Tupla **)malloc(sizeof(Tupla *) * n_vertices);
+    Tupla<int> **listaTupla = (Tupla<int> **)malloc(sizeof(Tupla<int> *) * n_vertices);
 
     // Criando stack de ponteiros para tuplas
-    stack<Tupla *> S;
+    stack<Tupla<int> *> S;
 
     // Criando variável iterável do DFS
-    Tupla *tupla;
+    Tupla<int> *tupla;
 
     // Variável auxiliar para guardar o nível de profundidade atual da DFS
     int nivel;
@@ -981,7 +981,7 @@ void ListaAdjacencias::DFS(int origem)
         vertices[i]->desmarca();
 
         // Aloca memória para uma tupla e guarda seu ponteiro na lista de tuplas
-        listaTupla[i] = (Tupla *) malloc(sizeof(Tupla));
+        listaTupla[i] = (Tupla<int> *) malloc(sizeof(Tupla<int>));
 
         // Inicializa a tupla definindo o vértice que ela corresponde como i
         // Ou seja, cada vértice tem sua tupla correspondente
@@ -1095,7 +1095,7 @@ int ListaAdjacencias::diametro()
 }
 
 // Função que percorre todas componentes conexas do grafo, as ordena dentro de um vetor e retorna a quantidade de CCs
-vector<Tupla> ListaAdjacencias::componentesConexos()
+vector<Tupla<int>> ListaAdjacencias::componentesConexos()
 {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1108,10 +1108,10 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
 
     // Declaração de tupla auxiliar
     // Cada tupla armazena os identificadores da componente conexa e seus respectivos tamanhos
-    Tupla t;
+    Tupla<int> t;
 
     // Vetor de tuplas
-    vector<Tupla> tamanhos;
+    vector<Tupla<int>> tamanhos;
     
     // Variável auxiliar para definir tamanho da componente conexa
     int tamanho;
@@ -1251,10 +1251,10 @@ vector<Tupla> ListaAdjacencias::componentesConexos()
 Lista** ListaAdjacencias::analiseComponentesConexos()
 {
     //Declara a tupla que será retirada da heap
-    Tupla t;
+    Tupla<int> t;
 
     //Acha todas as componentes conexas
-    vector<Tupla> ccs = componentesConexos();
+    vector<Tupla<int>> ccs = componentesConexos();
    
     //Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
