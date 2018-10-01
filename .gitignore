@@ -2,7 +2,4 @@
 *.swo
 *.swp
 *.sh
-live_journal.txt
-dblp.txt
-as_graph.txt
-grafo_teste.txt
+*.txt
