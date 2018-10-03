@@ -3,34 +3,25 @@
 
 using namespace std;
 
-template<class T>
-struct No{
-    No* pai;
-    T chave;
-    No* esquerda;
-    No* direita;
-};
-
 template <class T>
 class Heap{
     public:
-        Heap(bool max);
-        Heap(T *vetor, int t, bool max);
+        Heap(int t_max, bool max);
+        Heap(T *vetor, int t_vetor, int t_max, bool max);
         ~Heap();
 
+        void swap(int i, int j);
+    
         void insert(T novo_item);
+        T getRoot();
         T extract();
-
-        void max_heapfy();
-        void min_heapfy();
-
-        No<T>* raiz;
-        No<T>* ultimo;
-
+        void change(int no, T novo_valor);
 
     protected:
     private:
-        int tamanho;
+        T* buffer;
+        int ultimo;
+        int tamanho_max;
         bool e_max_heap;
 };
 
