@@ -58,6 +58,7 @@ class Grafo
 
   protected:
     bool peso;
+    bool pesos_negativos;
     int n_vertices;
     int n_arestas;
     Vertice **vertices;
@@ -80,9 +81,11 @@ class MatrizAdjacencias : public Grafo
     int BFS(int origem);
     void DFS(int origem);
 
+    void Dijkstra(int origem, int destino);
+
     int diametro();
 
-    vector<Tupla<int, int> > componentesConexos();
+    vector<Tupla<int, int> >  componentesConexos();
     Lista **analiseComponentesConexos();
 
   protected:
@@ -104,6 +107,8 @@ class ListaAdjacencias : public Grafo
 
     int BFS(int origem);
     void DFS(int origem);
+    
+    int* Dijkstra(int origem, int destino=-1);
 
     int diametro();
 

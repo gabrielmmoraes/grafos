@@ -46,6 +46,12 @@ Heap<T>::~Heap(){
     free(buffer);
 }
 
+//Retorna true sse a heap estiver vazia
+template <class T>
+bool Heap<T>::empty(){
+    return ultimo<=0;
+}
+
 //Troca de posição os elementos indexados por i e j
 template<class T>
 void Heap<T>::swap(int i, int j){
@@ -204,15 +210,15 @@ T Heap<T>::extract(){
 // ou maior que o anterior (heap máxima)
 template <class T>
 void Heap<T>::change(int no, T novo_valor){
-    // Se a heap for máxima e o novo valor for menor ou igual ao anterior
-    if(e_max_heap && novo_valor<=buffer[no]){
+    // Se a heap for máxima e o novo valor for menor ao anterior
+    if(e_max_heap && novo_valor<buffer[no]){
         // Informa o usuário e termina a função
         printf("O novo valor deve ser maior que o anterior.\n");
         return;
     }
 
-    // Se a heap for mínima e o novo valor for maior ou igual ao anterior
-    if(!e_max_heap && novo_valor>=buffer[no]){
+    // Se a heap for mínima e o novo valor for maior ao anterior
+    if(!e_max_heap && novo_valor>buffer[no]){
         //Informa o usuário e termina a função
         printf("O novo valor deve ser menor que o anterior.\n");
         return;

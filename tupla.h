@@ -13,6 +13,7 @@ template <class num1, class num2>
 
         bool operator >(Tupla t);
         bool operator <(Tupla t);
+
         num1 elem1;
         num2 elem2;
   };

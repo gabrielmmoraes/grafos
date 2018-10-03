@@ -10,6 +10,8 @@ class Heap{
         Heap(T *vetor, int t_vetor, int t_max, bool max);
         ~Heap();
 
+        bool empty();
+
         void swap(int i, int j);
     
         void insert(T novo_item);

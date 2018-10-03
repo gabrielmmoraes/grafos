@@ -1,12 +1,21 @@
 #include "grafo.h"
+#include "heap.h"
 #include <queue>
 #include <stack>
 #include <vector>
 #include <algorithm>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
 
 using namespace std;
+
+template <class num1, class num2>
+struct greater1{
+  bool operator()(Tupla<num1, num2>& a,Tupla<num1, num2>& b) const{
+    return a>b;
+  }
+}; 
 
 // Inicializa um vértice
 Vertice::Vertice()
@@ -214,6 +223,9 @@ MatrizAdjacencias::MatrizAdjacencias(int n, bool p)
     // Inicializa a flag de peso com o argumento passado
     peso = p;
 
+    // Inicializa a flag de pesos negativos como falsa
+    pesos_negativos = false;
+
     // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
     adjacencias = (float **)malloc(sizeof(float *) * n_vertices);
@@ -246,6 +258,9 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input, bool p)
 
     // Inicializa a flag de peso com o argumento passado
     peso = p;
+
+    // Inicializa a flag de pesos negativos como falsa
+    pesos_negativos = false;
 
     // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
     // Com isso conseguimos guardar características de cada vértice
@@ -319,6 +334,9 @@ int MatrizAdjacencias::getNArestas()
 // Define adjacência entre dois vértices
 void MatrizAdjacencias::setAdjacencia(int v1, int v2, float w)
 {
+    //Se o peso da nova aresta for negativa, muda a flag de pesos negativos para refletir isso
+    if(w<0) pesos_negativos = true;
+
     // Define o vértice v2 como vizinho de v1
     adjacencias[v1 - 1][v2 - 1] = w;
 
@@ -763,7 +781,11 @@ ListaAdjacencias::ListaAdjacencias(int n, bool p)
     // Inicializa n_arestas como 0
     n_arestas = 0;
 
+    // Inicializa a flag de pesos com o argumento passado
     peso = p;
+
+    // Inicializa a flag de pesos neagtivos como false
+    pesos_negativos = false;
 
     // Alocação de memória para lista de ponteiros para vértices e lista de adjacência
     vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
@@ -789,7 +811,11 @@ ListaAdjacencias::ListaAdjacencias(FILE *input, bool p)
     // Inicializa o número de arestas como 0
     n_arestas = 0;
 
+    // Inicializa a flag de pesos com o argumento passado
     peso = p;
+
+    // Inicializa a flag de pesos negativos como false
+    pesos_negativos = false;
 
     // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
     // Com isso conseguimos guardar características de cada vértice
@@ -854,6 +880,9 @@ int ListaAdjacencias::getNArestas()
 // Define adjacência entre dois vértices
 void ListaAdjacencias::setAdjacencia(int v1, int v2, float w)
 {
+    //Se o peso da nova aresta for negativa, muda a flag de pesos negativos para refletir isso
+    if(w<0) pesos_negativos = true;
+
     // Adiciona o vértice v2 como vizinho de v1
     adjacencias[v1 - 1]->push(v2 - 1, w);
 
@@ -1080,6 +1109,104 @@ void ListaAdjacencias::DFS(int origem)
 
     // Libera memória da listaTupla
     free(listaTupla);
+}
+
+// Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
+// Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
+int* ListaAdjacencias::Dijkstra(int origem, int destino){
+
+    // Se há pesos negativos
+    if(pesos_negativos){
+        // Informa o usuário e termina a função
+        printf("Não é possível utilizar o algoritmo de Dijkstra com pesos negativos.\n");
+        return NULL; 
+    }
+
+    // Aloca memória para vetor de distâncias
+    int* dist = (int*) malloc(sizeof(int)*n_vertices);
+
+    // Inicia vector base para heap de vértices a serem explorados
+    vector<Tupla<int, float> > restantes;
+
+    // Tupla temporária
+    Tupla<int, float> t, vizinho;
+
+    // Declara ponteiro para percorrer vizinhos dos vértices
+    ListNode* pListaAdjacencias;
+
+    // Declara iterador para percorrer vector
+    vector<Tupla<int, float> >::iterator it;
+
+    // Para todos os vértices
+    for(int i=0;i<n_vertices;i++){
+        // Tupla recebe o índice do vértice
+        t.elem1 = i;
+        // E a distância inicial infinita
+        t.elem2 = INFINITY;
+        // Tupla adicionada no vector
+        restantes.push_back(t);
+        // Distancia inicial infinita
+        dist[i] = INFINITY;
+    }
+
+    // Define distância da origem como 0 no vetor e na base da heap
+    dist[origem] = 0;
+    restantes[origem].elem2 = 0;
+
+    // Função padrão da STL para transformar o vector em heap
+    make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+
+    // Enquanto há vértices a serem explorados
+    while(!restantes.empty()){
+
+        // t é o vértice restante com menor distância até a origem no momento
+        t = restantes.front();
+
+        if(t.elem1 == destino) break;
+
+        // Remove t da heap
+        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        restantes.pop_back();
+
+        // Acessa lista de adjacências do vértice
+        pListaAdjacencias = adjacencias[t.elem1]->getInicio();
+        
+        // Até o final da lista
+        while(pListaAdjacencias != NULL){
+
+            // Acessa a tupla referente ao índice do vizinho e peso da aresta
+            vizinho = pListaAdjacencias->elemento;
+
+            // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
+            if(dist[vizinho.elem1] > dist[t.elem1] + vizinho.elem2){
+                // Redefine distânica do vizinho para a menor
+                dist[vizinho.elem1] = dist[t.elem1] + vizinho.elem2;
+
+                // Define um contador para achar o vizinho na heap
+                int i = 0;
+                // Para todo vértice da heap
+                for(it=restantes.begin();it!=restantes.end();++it){
+                    // Se o vértice da heap tiver o mesmo identificador que o vizinho
+                    if((*it).elem1 == vizinho.elem1){
+                        // Redefine a menor distância do vizinho na heap e interrompe o loop
+                        restantes[i].elem2 = dist[vizinho.elem1];
+                        break;
+                    }
+                    // Incrementa o contador, se o vértice da heap não for o vizinho
+                    i++;
+                }
+            }
+
+            // Acessa o próximo elemento da lista
+            pListaAdjacencias = pListaAdjacencias->prox;
+        }
+
+        // Reordena a heap
+        sort_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+    }
+
+    // Retorna o vetor de distâncias
+    return dist;
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
