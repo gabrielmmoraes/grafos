@@ -81,7 +81,7 @@ class MatrizAdjacencias : public Grafo
     int BFS(int origem);
     void DFS(int origem);
 
-    void Dijkstra(int origem, int destino);
+    int* Dijkstra(int origem, int destino=-1);
 
     int diametro();
 
