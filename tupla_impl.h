@@ -21,12 +21,12 @@ Tupla<num1, num2>::~Tupla(){}
 template <class num1, class num2>
 bool Tupla<num1, num2>::operator>(Tupla t)
 {
-    return elem2 > t.elem2 ? elem2 : t.elem2;
+    return elem2 > t.elem2;
 }
 
 // Overload de operador criado para a Tupla poder ser usada no heap do STL
 template <class num1, class num2>
 bool Tupla<num1, num2>::operator <(Tupla t)
 {
-    return elem2 < t.elem2 ? elem2 : t.elem2;
+    return elem2 < t.elem2;
 }

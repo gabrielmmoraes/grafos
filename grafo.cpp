@@ -542,7 +542,7 @@ void MatrizAdjacencias::DFS(int origem)
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
-int* MatrizAdjacencias::Dijkstra(int origem, int destino){
+float* MatrizAdjacencias::Dijkstra(int origem, int destino){
 
     // Se há pesos negativos
     if(pesos_negativos){
@@ -552,7 +552,13 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
     }
 
     // Aloca memória para vetor de distâncias
-    int* dist = (int*) malloc(sizeof(int)*n_vertices);
+    float* dist = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Aloca memória para vetor de pais temporários
+    int* pai = (int*) malloc(sizeof(int*)*n_vertices);
+
+    // Varíavel para nível inicial
+    int nivel = 0;
 
     // Inicia vector base para heap de vértices a serem explorados
     vector<Tupla<int, float> > restantes;
@@ -576,16 +582,16 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
         restantes.push_back(t);
         // Distancia inicial infinita
         dist[i] = INFINITY;
+        // Inicialmente nenhum vértice tem pai
+        pai[i] = -2;
     }
 
     // Define distância da origem como 0 no vetor e na base da heap
     dist[origem] = 0;
     restantes[origem].elem2 = 0;
     
-    // Define pai e nível da origem na árvore geradora
-    // Define a origem como raiz da árvore geradora
-    vertices[origem]->setPai(-1);
-    vertices[origem]->setNivel(0);
+    // Define pai temporário da origem na árvore geradora
+    pai[origem] = -1;
 
     // Função padrão da STL para transformar o vector em heap
     make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
@@ -594,13 +600,18 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
     while(!restantes.empty()){
 
         // t é o vértice restante com menor distância até a origem no momento
-        t = restantes.front();
+        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        t = restantes.back();
+
+        // Define pai e nível do vértice selecionado na árvore geradora
+        vertices[t.elem1]->setPai(pai[t.elem1]);
+        if(pai[t.elem1]>0) nivel = vertices[pai[t.elem1]]->getNivel()+1;                
+        vertices[t.elem1]->setNivel(nivel);
 
         // Se o destino foi atingido, interrompe o loop
         if(t.elem1 == destino) break;
 
         // Remove t da heap
-        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
         restantes.pop_back();
         
         // Percorre a matriz de adjacencias
@@ -612,15 +623,6 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
 
                 // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
                 if(dist[vizinho] > dist[t.elem1] + peso){
-                    // Redefine distânica do vizinho para a menor
-                    dist[vizinho] = dist[t.elem1] + peso;
-
-                    // Define pai do vizinho na árvore geradora
-                    vertices[vizinho]->setPai(t.elem1);
-                    // Calcula o nível do vizinho na árvore geradora como o nível do seu pai +1
-                    int nivel = vertices[t.elem1]->getNivel()+1;
-                    // Define nível do vizinho na árvore geradora
-                    vertices[vizinho]->setNivel(nivel);
 
                     // Define um contador para achar o vizinho na heap
                     int i = 0;
@@ -628,6 +630,9 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
                     for(it=restantes.begin();it!=restantes.end();++it){
                         // Se o vértice da heap tiver o mesmo identificador que o vizinho
                         if((*it).elem1 == vizinho){
+                            // Redefine distânica do vizinho para a menor
+                            dist[vizinho] = dist[t.elem1] + peso;
+                            pai[vizinho] = t.elem1;
                             // Redefine a menor distância do vizinho na heap e interrompe o loop
                             restantes[i].elem2 = dist[vizinho];
                             break;
@@ -639,12 +644,122 @@ int* MatrizAdjacencias::Dijkstra(int origem, int destino){
             }
         }
 
-        // Reordena a heap
-        sort_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        // Reordena heap
+        make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
     }
 
     // Retorna o vetor de distâncias
     return dist;
+}
+
+// Algoritmo de árvore geradora mínima a partir da origem
+float* MatrizAdjacencias::Prim(int origem){
+
+    // Se há pesos negativos
+    if(pesos_negativos){
+        // Informa o usuário e termina a função
+        printf("Não é possível utilizar o algoritmo de Prim com pesos negativos.\n");
+        return NULL; 
+    }
+
+    // Aloca memória para vetor de custos
+    float* custo = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Aloca memória para vetor de pais temporários
+    int* pai = (int*) malloc(sizeof(int)*n_vertices);
+    
+    // Varíavel para nível inicial
+    int nivel;
+
+    // Inicia vector base para heap de vértices a serem explorados
+    vector<Tupla<int, float> > restantes;
+
+    // Tupla temporária
+    Tupla<int, float> t;
+
+    // Varíavel temporária para peso a aresta analisada
+    int peso;
+
+    // Declara iterador para percorrer vector base da heap
+    vector<Tupla<int, float> >::iterator it;
+
+    // Para todos os vértices
+    for(int i=0;i<n_vertices;i++){
+        // Tupla recebe o índice do vértice
+        t.elem1 = i;
+        // E o custo inicial infinito
+        t.elem2 = INFINITY;
+        // Tupla adicionada no vector
+        restantes.push_back(t);
+        // Custo inicial infinito
+        custo[i] = INFINITY;
+        // Inicialmente ninguém tem pai
+        pai[i] = -2;
+    }
+
+    // Define custo da origem como 0 no vetor e na base da heap
+    custo[origem] = 0;
+    restantes[origem].elem2 = 0;
+    
+    // Define pai temporário da origem
+    pai[origem] = -1;
+
+    // Função padrão da STL para transformar o vector em heap
+    make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+
+    // Enquanto há vértices a serem explorados
+    while(!restantes.empty()){
+
+        // t é o vértice restante com menor distância até a origem no momento
+        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        t = restantes.back();
+
+        // Define pai e nível do vértice selecionado na árvore geradora
+        vertices[t.elem1]->setPai(pai[t.elem1]);
+        if(pai[t.elem1]>0) nivel = vertices[pai[t.elem1]]->getNivel()+1;                
+        vertices[t.elem1]->setNivel(nivel);
+
+        // Remove t da heap
+        restantes.pop_back();
+        
+        // Percorre a matriz de adjacencias
+        for(int vizinho=0;vizinho<n_vertices;vizinho++){
+
+            peso = adjacencias[t.elem1][vizinho];
+            // Se o vizinho é realmente vizinho de t
+            if(peso != 0){
+
+                // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
+                if(custo[vizinho] > peso){
+
+                    // Define um contador para achar o vizinho na heap
+                    int i = 0;
+                    // Para todo vértice da heap
+                    for(it=restantes.begin();it!=restantes.end();++it){
+                        // Se o vértice da heap tiver o mesmo identificador que o vizinho
+                        if((*it).elem1 == vizinho){
+                            // Redefine distânica do vizinho para a menor
+                            custo[vizinho] = peso;
+
+                            // Define pai temporário do vizinho na árvore geradora
+                            pai[vizinho] = t.elem1;
+                            // Redefine a menor distância do vizinho na heap e interrompe o loop
+                            restantes[i].elem2 = custo[vizinho];
+                            break;
+                        }
+                        // Incrementa o contador, se o vértice da heap não for o vizinho
+                        i++;
+                    }
+                }
+            }
+        }
+
+        // Reordena a heap
+        make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+    }
+
+    // Retorna o vetor de distâncias
+    return custo;
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
@@ -846,10 +961,10 @@ Lista** MatrizAdjacencias::analiseComponentesConexos()
     while(!ccs.empty()){
     
         //Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
-        t = ccs.front();
+        pop_heap(ccs.begin(),ccs.end());
+        t = ccs.back();
 
         //Remove essa tupla da heap
-        pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
     
         //Inicia a lista para a componente conexa c
@@ -866,9 +981,6 @@ Lista** MatrizAdjacencias::analiseComponentesConexos()
                 componentesConexas[c]->push(i);
             }
         }
-
-        //Reordena a heap (move a próxima componente conexa para o topo da heap)
-        sort_heap(ccs.begin(),ccs.end());
 
         //Incrementa o contador de componentes
         c++;
@@ -1220,7 +1332,7 @@ void ListaAdjacencias::DFS(int origem)
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
-int* ListaAdjacencias::Dijkstra(int origem, int destino){
+float* ListaAdjacencias::Dijkstra(int origem, int destino){
 
     // Se há pesos negativos
     if(pesos_negativos){
@@ -1230,7 +1342,13 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
     }
 
     // Aloca memória para vetor de distâncias
-    int* dist = (int*) malloc(sizeof(int)*n_vertices);
+    float* dist = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Aloca memória para vetor de pais temporários
+    int* pai = (int*) malloc(sizeof(int*)*n_vertices);
+
+    // Varíavel para nível inicial
+    int nivel = 0;
 
     // Inicia vector base para heap de vértices a serem explorados
     vector<Tupla<int, float> > restantes;
@@ -1254,16 +1372,16 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
         restantes.push_back(t);
         // Distancia inicial infinita
         dist[i] = INFINITY;
+        // Inicialmente nenhum vértice tem pai
+        pai[i] = -2;
     }
 
     // Define distância da origem como 0 no vetor e na base da heap
     dist[origem] = 0;
     restantes[origem].elem2 = 0;
     
-    // Define pai e nível da origem na árvore geradora
-    // Define a origem como raiz da árvore geradora
-    vertices[origem]->setPai(-1);
-    vertices[origem]->setNivel(0);
+    // Define pai temporário da origem na árvore geradora
+    pai[origem] = -1;
 
     // Função padrão da STL para transformar o vector em heap
     make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
@@ -1272,13 +1390,18 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
     while(!restantes.empty()){
 
         // t é o vértice restante com menor distância até a origem no momento
-        t = restantes.front();
+        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        t = restantes.back();
+
+        // Define pai e nível do vértice selecionado na árvore geradora
+        vertices[t.elem1]->setPai(pai[t.elem1]);
+        if(pai[t.elem1]>0) nivel = vertices[pai[t.elem1]]->getNivel()+1;                
+        vertices[t.elem1]->setNivel(nivel);
 
         // Se o destino foi atingido, interrompe o loop
         if(t.elem1 == destino) break;
 
         // Remove t da heap
-        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
         restantes.pop_back();
 
         // Acessa lista de adjacências do vértice
@@ -1292,15 +1415,6 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
 
             // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
             if(dist[vizinho.elem1] > dist[t.elem1] + vizinho.elem2){
-                // Redefine distânica do vizinho para a menor
-                dist[vizinho.elem1] = dist[t.elem1] + vizinho.elem2;
-
-                // Define pai do vizinho na árvore geradora
-                vertices[vizinho.elem1]->setPai(t.elem1);
-                // Calcula o nível do vizinho na árvore geradora como o nível do seu pai +1
-                int nivel = vertices[t.elem1]->getNivel()+1;
-                // Define nível do vizinho na árvore geradora
-                vertices[vizinho.elem1]->setNivel(nivel);
 
                 // Define um contador para achar o vizinho na heap
                 int i = 0;
@@ -1308,6 +1422,9 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
                 for(it=restantes.begin();it!=restantes.end();++it){
                     // Se o vértice da heap tiver o mesmo identificador que o vizinho
                     if((*it).elem1 == vizinho.elem1){
+                        // Redefine distânica do vizinho para a menor
+                        dist[vizinho.elem1] = dist[t.elem1] + vizinho.elem2;
+                        pai[vizinho.elem1] = t.elem1;
                         // Redefine a menor distância do vizinho na heap e interrompe o loop
                         restantes[i].elem2 = dist[vizinho.elem1];
                         break;
@@ -1321,12 +1438,128 @@ int* ListaAdjacencias::Dijkstra(int origem, int destino){
             pListaAdjacencias = pListaAdjacencias->prox;
         }
 
-        // Reordena a heap
-        sort_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        // Reordena heap
+        make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+
     }
 
     // Retorna o vetor de distâncias
     return dist;
+}
+
+// Algoritmo de árvore geradora mínima a partir da origem
+float* ListaAdjacencias::Prim(int origem){
+
+    // Se há pesos negativos
+    if(pesos_negativos){
+        // Informa o usuário e termina a função
+        printf("Não é possível utilizar o algoritmo de Prim com pesos negativos.\n");
+        return NULL; 
+    }
+
+    // Aloca memória para vetor de custos
+    float* custo = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Aloca memória para vetor de pais temporários
+    int* pai = (int*) malloc(sizeof(int)*n_vertices);
+    
+    // Varíavel para nível inicial
+    int nivel;
+
+    // Inicia vector base para heap de vértices a serem explorados
+    vector<Tupla<int, float> > restantes;
+
+    // Tupla temporária
+    Tupla<int, float> t, vizinho;
+
+    // Declara ponteiro para percorrer vizinhos dos vértices
+    ListNode* pListaAdjacencias;
+
+    // Declara iterador para percorrer vector base da heap
+    vector<Tupla<int, float> >::iterator it;
+
+    // Para todos os vértices
+    for(int i=0;i<n_vertices;i++){
+        // Tupla recebe o índice do vértice
+        t.elem1 = i;
+        // E o custo inicial infinito
+        t.elem2 = INFINITY;
+        // Tupla adicionada no vector
+        restantes.push_back(t);
+        // Custo inicial infinito
+        custo[i] = INFINITY;
+        // Inicialmente ninguém tem pai
+        pai[i] = -2;
+    }
+
+    // Define custo da origem como 0 no vetor e na base da heap
+    custo[origem] = 0;
+    restantes[origem].elem2 = 0;
+    
+    // Define pai temporário da origem
+    pai[origem] = -1;
+
+    // Função padrão da STL para transformar o vector em heap
+    make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+
+    // Enquanto há vértices a serem explorados
+    while(!restantes.empty()){
+
+        // t é o vértice restante com menor custo para ser adicionado a árvore
+        pop_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+        t = restantes.back();
+
+        // Define pai e nível do vértice selecionado na árvore geradora
+        vertices[t.elem1]->setPai(pai[t.elem1]);
+        if(pai[t.elem1]>0) nivel = vertices[pai[t.elem1]]->getNivel()+1;                
+        vertices[t.elem1]->setNivel(nivel);
+
+        // Remove t da heap
+        restantes.pop_back();
+
+        // Acessa lista de adjacências do vértice
+        pListaAdjacencias = adjacencias[t.elem1]->getInicio();
+        
+        // Até o final da lista
+        while(pListaAdjacencias != NULL){
+
+            // Acessa a tupla referente ao índice do vizinho e peso da aresta
+            vizinho = pListaAdjacencias->elemento;
+
+            // Se o custo do vizinho for maior que o peso da aresta
+            if(custo[vizinho.elem1] > vizinho.elem2){
+                // Define um contador para achar o vizinho na heap
+                int i = 0;
+                // Para todo vértice da heap
+                for(it=restantes.begin();it!=restantes.end();++it){
+                    // Se o vértice da heap tiver o mesmo identificador que o vizinho
+                    if((*it).elem1 == vizinho.elem1){
+                        // Redefine custo do vizinho para o menor
+                        custo[vizinho.elem1] = vizinho.elem2;
+
+                        // Define pai temporário do vizinho na árvore geradora
+                        pai[vizinho.elem1] = t.elem1;
+                        // Redefine o menor custo do vizinho na heap e interrompe o loop
+                        restantes[i].elem2 = custo[vizinho.elem1];
+                        //printf("Menor: (%d, %f)\n",restantes.front().elem1+1,restantes.front().elem2);
+                        break;
+                    }
+                    // Incrementa o contador, se o vértice da heap não for o vizinho
+                    i++;
+                }
+            }
+
+            // Acessa o próximo elemento da lista
+            pListaAdjacencias = pListaAdjacencias->prox;
+        }
+
+        // Reordena a heap
+        make_heap(restantes.begin(), restantes.end(), greater1<int, float>());
+
+    }
+
+    // Retorna o vetor de distâncias
+    return custo;
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
@@ -1539,10 +1772,10 @@ Lista** ListaAdjacencias::analiseComponentesConexos()
     while(!ccs.empty()){
   
         //Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
-        t = ccs.front();
+        pop_heap(ccs.begin(),ccs.end());
+        t = ccs.back();
     
         //Remove essa tupla da heap
-        pop_heap(ccs.begin(),ccs.end());
         ccs.pop_back();
   
         //Inicia a lista para a componente conexa c
@@ -1559,10 +1792,6 @@ Lista** ListaAdjacencias::analiseComponentesConexos()
                 componentesConexas[c]->push(i);
             }
         }
-        
-        //Reordena a heap (move a próxima componente conexa para o topo da heap)
-        sort_heap(ccs.begin(),ccs.end());
-       
         //Incrementa o contador de componentes
         c++;
     }

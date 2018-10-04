@@ -81,7 +81,9 @@ class MatrizAdjacencias : public Grafo
     int BFS(int origem);
     void DFS(int origem);
 
-    int* Dijkstra(int origem, int destino=-1);
+    float* Dijkstra(int origem, int destino=-1);
+
+    float* Prim(int origem);
 
     int diametro();
 
@@ -108,7 +110,9 @@ class ListaAdjacencias : public Grafo
     int BFS(int origem);
     void DFS(int origem);
     
-    int* Dijkstra(int origem, int destino=-1);
+    float* Dijkstra(int origem, int destino=-1);
+
+    float* Prim(int origem);
 
     int diametro();
 
