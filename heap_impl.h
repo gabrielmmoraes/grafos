@@ -1,4 +1,5 @@
 #include "heap.h"
+#include "tupla.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -7,27 +8,35 @@ using namespace std;
 
 // Inicializa uma heap vazia de tamanho t_max.
 // O valor booleano max determina se a heap é máxima ou mínima. Se true, heap máxima. 
-template <class T>
-Heap<T>::Heap(int t_max, bool max){    
+Heap::Heap(int t_max, bool max){    
     // Define o tamanho máximo da heap
     tamanho_max = t_max; 
+    
     // Aloca a memória para a heap
-    buffer = (T*) malloc(sizeof(T)*tamanho_max);
+    buffer = (Tupla<int,float>**) malloc(sizeof(Tupla<int,float>*)*tamanho_max);
+    
+    buffer_index = (int*) malloc(sizeof(int)*tamanho_max);
+
     // Define o índice referente ao final do heap ocupado, 0 para a heap vazia 
     ultimo = 0; 
+    
     // Define o tipo de heap
     e_max_heap = max;
 }
 
 //Inicializa uma heap de tamanho t_max, a partir de um vetor de tamanho t_vetor
-template <class T>
-Heap<T>::Heap(T *vetor, int t_vetor, int t_max, bool max){
+Heap::Heap(Tupla<int,float>** vetor, int t_vetor, int t_max, bool max){
     // Define o tamanho máximo da heap
     tamanho_max = t_max;
+
     // Aloca a memória para a heap
-    buffer = (T*) malloc(sizeof(T)*tamanho_max);
+    buffer = (Tupla<int,float>**) malloc(sizeof(Tupla<int,float>*)*tamanho_max);
+    
+    buffer_index = (int*) malloc(sizeof(int)*tamanho_max);
+
     // Define o índice referente ao final do heap ocupado, 0 para a heap vazia
     ultimo = 0;
+    
     // Define o tipo de heap
     e_max_heap = max;
 
@@ -40,39 +49,48 @@ Heap<T>::Heap(T *vetor, int t_vetor, int t_max, bool max){
 }
 
 //Destrutor da heap
-template <class T>
-Heap<T>::~Heap(){
+Heap::~Heap(){
     //Libera a memória ocupada pela heap
     free(buffer);
 }
 
 //Retorna true sse a heap estiver vazia
-template <class T>
-bool Heap<T>::empty(){
+bool Heap::empty(){
     return ultimo<=0;
 }
 
 //Troca de posição os elementos indexados por i e j
-template<class T>
-void Heap<T>::swap(int i, int j){
+void Heap::swap(int i, int j){
     // Variável temporária com o valor de i
-    T tmp = buffer[i];
+    Tupla<int,float>* tmp = buffer[i];
+
+    int tmp1 = buffer_index[buffer[i]->elem1];
+
+    buffer_index[buffer[i]->elem1] = buffer_index[buffer[j]->elem1];
+
     // Move o valor de j para posição i
     buffer[i] = buffer[j];
+
+    buffer_index[buffer[j]->elem1] = tmp1;
+
     // Move variável temporária (valor de i) para posição j
     buffer[j] = tmp;
 }
 
 //Insere um novo elemento à heap
-template <class T>
-void Heap<T>::insert(T novo_item){
-
+void Heap::insert(Tupla<int,float>* novo_item){
+    
     // Se a heap não está totalmente ocupada
     if(ultimo<tamanho_max){ 
         //Insere novo elemento no final da heap
         buffer[ultimo] = novo_item;
+
+        // NAO CRIAR TUPLAS COM MESMO INDICE
+        buffer_index[novo_item->elem1] = ultimo; 
+        
         //Incrementa o índice referente ao final ocupado
         ultimo++;
+        
     }
     // Se a heap está totalmente ocupada
     else{ 
@@ -82,7 +100,7 @@ void Heap<T>::insert(T novo_item){
     }
 
     // Variáveis temporárias para reordenação da heap
-    // no é o elemento inserido
+    // nó é o elemento inserido
     int no = ultimo-1;
     // pai é o seu pai na árvore da heap
     int pai;
@@ -93,10 +111,13 @@ void Heap<T>::insert(T novo_item){
         pai = (no-1)/2;
         // Se a heap é máxima
         if(e_max_heap){
-            // Se o valor do no for maior que o valor do seu pai
-            if(buffer[no] > buffer[pai]){
+            // Se o valor do nó for maior que o valor do seu pai
+            //printf("\tComparando %.1f com %.1f\n", buffer[no]->elem2, buffer[pai]->elem2);
+            if(buffer[no]->elem2 > buffer[pai]->elem2){
                 // Troca o no com o pai
                 swap(no, pai);
+               // printf("\tPar trocado para %.1f, %.1f\n", buffer[no]->elem2, buffer[pai]->elem2);
+
                 // Redefine o no como sendo o pai
                 no = pai;
             }
@@ -105,7 +126,7 @@ void Heap<T>::insert(T novo_item){
         // Se a heap é máxima
         }else{
             // Se o valor do no for menor que o valor do seu pai
-            if(buffer[no] < buffer[pai]){
+            if(buffer[no]->elem2 < buffer[pai]->elem2){
                 // Troca o no com o pai
                 swap(no, pai);
                 // Redefine o no como sendo o pai
@@ -118,14 +139,12 @@ void Heap<T>::insert(T novo_item){
 }
 
 // Retorna a raiz da heap
-template <class T>
-T Heap<T>::getRoot(){
+Tupla<int,float>* Heap::getRoot(){
     return buffer[0];
 }
 
 // Retorna e retira a raiz da heap
-template <class T>
-T Heap<T>::extract(){
+Tupla<int,float>* Heap::extract(){
 
     // Se a heap está vazia
     if(ultimo<=0){
@@ -133,7 +152,10 @@ T Heap<T>::extract(){
         printf("A heap está vazia.\n");
     }
     // Pega a raiz da heap
-    T raiz = buffer[0];
+    Tupla<int,float>* raiz = buffer[0];
+
+    buffer_index[raiz->elem1] = -1;
+    
     // Se a heap não está vazia
     if(ultimo>=0){
         // Passa o último elemento para a raiz
@@ -143,7 +165,7 @@ T Heap<T>::extract(){
     }
 
     // Define variáveis temporárias para reordenação da heap
-    // no é o elemento que foi passado para a raiz
+    // nó é o elemento que foi passado para a raiz
     int no = 0;
     // tmp é uma temporária para comparação
     int tmp;
@@ -159,12 +181,12 @@ T Heap<T>::extract(){
         // Se a heap for máxima
         if(e_max_heap){
             // Se o filho a esquerda for maior que o o no 
-            if(esquerda<ultimo && buffer[tmp] < buffer[esquerda]){
+            if(esquerda<ultimo && buffer[tmp]->elem2 < buffer[esquerda]->elem2){
                 // Define o filho a esquerda como o maior 
                 tmp = esquerda;
             }
             // Se o filho a direita for maior que o maior
-            if(direita<ultimo && buffer[tmp] < buffer[direita]){
+            if(direita<ultimo && buffer[tmp]->elem2 < buffer[direita]->elem2){
                 // Define o filho a direita como o maior
                 tmp = direita;
             }
@@ -180,12 +202,12 @@ T Heap<T>::extract(){
         // Se a heap for mínima
         }else{
             // Se o filho a esquerda for menor que o no
-            if(esquerda<ultimo && buffer[tmp] > buffer[esquerda]){
+            if(esquerda<ultimo && buffer[tmp]->elem2 > buffer[esquerda]->elem2){
                 // Define o filho a esquerda como o menor
                 tmp = esquerda;
             }
             // Se o filho a direita for menor que o menor
-            if(direita<ultimo && buffer[tmp] > buffer[direita]){
+            if(direita<ultimo && buffer[tmp]->elem2 > buffer[direita]->elem2){
                 // Define o filho a direita como o menor
                 tmp = direita;
             }
@@ -208,24 +230,23 @@ T Heap<T>::extract(){
 // Modifica o valor do no
 // assumindo que o novo valor é menor que o anterior (heap mínima)
 // ou maior que o anterior (heap máxima)
-template <class T>
-void Heap<T>::change(int no, T novo_valor){
+void Heap::change(int no, float novo_valor){
     // Se a heap for máxima e o novo valor for menor ao anterior
-    if(e_max_heap && novo_valor<buffer[no]){
+    if(e_max_heap && novo_valor < buffer[no]->elem2){
         // Informa o usuário e termina a função
         printf("O novo valor deve ser maior que o anterior.\n");
         return;
     }
 
     // Se a heap for mínima e o novo valor for maior ao anterior
-    if(!e_max_heap && novo_valor>buffer[no]){
+    if(!e_max_heap && novo_valor > buffer[no]->elem2){
         //Informa o usuário e termina a função
         printf("O novo valor deve ser menor que o anterior.\n");
         return;
     }
 
     // Atualiza o valor do no
-    buffer[no] = novo_valor;
+    buffer[no]->elem2 = novo_valor;
     
     // Variável temporária para reordenação
     int pai;
@@ -237,7 +258,7 @@ void Heap<T>::change(int no, T novo_valor){
         // Se a heap for máxima
         if(e_max_heap){
             // Se o valor do pai for menor que o valor do no
-            if(buffer[pai] < buffer[no]){
+            if(buffer[pai]->elem2 < buffer[no]->elem2){
                 // Troca o pai com o no
                 swap(no, pai);
                 // Redefine a posição do no
@@ -248,7 +269,7 @@ void Heap<T>::change(int no, T novo_valor){
         // Se a heap for mínima
         }else{
             // Se o valor do pai for maior que o valor do no
-            if(buffer[pai] > buffer[no]){
+            if(buffer[pai]->elem2 > buffer[no]->elem2){
                 // Troca o pai com o no
                 swap(no,pai);
                 // Redefine a posição do no
@@ -258,4 +279,8 @@ void Heap<T>::change(int no, T novo_valor){
             else break;
         }
     }
+}
+
+int Heap::getIndex(Tupla<int,float>* tupla){
+    return buffer_index[tupla->elem1];
 }

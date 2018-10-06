@@ -82,8 +82,9 @@ class MatrizAdjacencias : public Grafo
     void DFS(int origem);
 
     float* Dijkstra(int origem, int destino=-1);
-
     float* Prim(int origem);
+
+    Tupla<int*, float> CaminhoMinimo();
 
     int diametro();
 

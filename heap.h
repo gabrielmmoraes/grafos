@@ -3,25 +3,27 @@
 
 using namespace std;
 
-template <class T>
 class Heap{
     public:
         Heap(int t_max, bool max);
-        Heap(T *vetor, int t_vetor, int t_max, bool max);
+        Heap(Tupla<int,float>** vetor, int t_vetor, int t_max, bool max);
         ~Heap();
 
         bool empty();
 
         void swap(int i, int j);
     
-        void insert(T novo_item);
-        T getRoot();
-        T extract();
-        void change(int no, T novo_valor);
+        void insert(Tupla<int,float>* novo_item);
+        Tupla<int,float>* getRoot();
+        Tupla<int,float>* extract();
+        void change(int no, float novo_valor);
+        int getIndex(Tupla<int,float>* tupla);
+
+        Tupla<int,float>** buffer;
+        int* buffer_index;
 
     protected:
     private:
-        T* buffer;
         int ultimo;
         int tamanho_max;
         bool e_max_heap;
