@@ -84,9 +84,13 @@ class MatrizAdjacencias : public Grafo
     float* Dijkstra(int origem, int destino=-1);
     float* Prim(int origem);
 
-    Tupla<int*, float> CaminhoMinimo();
+    Tupla<int*, float> CaminhoMinimo(int origem, int destino);
+
+    void ArvoreGeradoraMinima(FILE* output);
 
     int diametro();
+    float excentricidade(int vertice);
+    float DistanciaMedia();
 
     vector<Tupla<int, int> >  componentesConexos();
     Lista **analiseComponentesConexos();
@@ -112,10 +116,15 @@ class ListaAdjacencias : public Grafo
     void DFS(int origem);
     
     float* Dijkstra(int origem, int destino=-1);
-
     float* Prim(int origem);
 
+    Tupla<int*, float> CaminhoMinimo(int origem, int destino);
+
+    void ArvoreGeradoraMinima(FILE* output);
+
     int diametro();
+    float excentricidade(int vertice);
+    float DistanciaMedia();
 
     vector<Tupla<int, int> > componentesConexos();
     Lista **analiseComponentesConexos();

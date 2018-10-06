@@ -21,10 +21,10 @@ class Heap{
 
         Tupla<int,float>** buffer;
         int* buffer_index;
+        int ultimo;
 
     protected:
     private:
-        int ultimo;
         int tamanho_max;
         bool e_max_heap;
 };

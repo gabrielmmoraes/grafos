@@ -541,6 +541,7 @@ void MatrizAdjacencias::DFS(int origem)
 }
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
+// Retorna um vetor de distâncias em que o último elemento guarda todas as distâncias acumuladas
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
 float* MatrizAdjacencias::Dijkstra(int origem, int destino){
 
@@ -553,6 +554,9 @@ float* MatrizAdjacencias::Dijkstra(int origem, int destino){
 
     // Aloca memória para vetor de distâncias
     float* dist = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Define acumulador de distâncias
+    float dist_acum = 0;
 
     // Aloca memória para vetor de pais temporários
     int* pai = (int*) malloc(sizeof(int*)*n_vertices);
@@ -601,6 +605,8 @@ float* MatrizAdjacencias::Dijkstra(int origem, int destino){
         // t é o vértice restante com menor distância até a origem no momento
         t = h.extract();
 
+        // Adiciona distância do vértice selecionado ao acumulador de distâncias
+        dist_acum += dist[t->elem1]!=INFINITY?dist[t->elem1]:0; 
 
         // Define pai e nível do vértice selecionado na árvore geradora
         vertices[t->elem1]->setPai(pai[t->elem1]);
@@ -620,22 +626,29 @@ float* MatrizAdjacencias::Dijkstra(int origem, int destino){
                 // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
                 if(dist[vizinho] > dist[t->elem1] + peso){
 
-                    // Define um contador para achar o vizinho na heap
-                    int i = 0;
+                    // Define index do vizinho na heap
+                    int i;
                     
                     Tupla<int,float> t_vizinho(vizinho, 0);
 
                     i = h.getIndex(&t_vizinho);
 
+                    // Se o vizinho ainda está na heap
                     if (i != -1){
+                        // Redefine menos distância
                         dist[vizinho] = dist[t->elem1] + peso;
+                        // Define pai temporário
                         pai[vizinho] = t->elem1;
+                        // Redefine menor distância na heap
                         h.change(i, dist[vizinho]);
                     }         
                 }
             }
         }
     }
+
+    // Adiona soma das distâncias ao final do vetor de distâncias
+    dist[n_vertices] = dist_acum;
 
     // Retorna o vetor de distâncias
     return dist;
@@ -732,6 +745,117 @@ float* MatrizAdjacencias::Prim(int origem){
     return custo;
 }
 
+// Retorna o caminho mínimo e a distânica da origem ao destino
+// Se origem e destino estão em componentes conexas diferentes
+// Distância é infinita e caminho é apenas o destino
+Tupla<int*, float> MatrizAdjacencias::CaminhoMinimo(int origem, int destino){
+
+    // Vetor de índices referente ao caminho da origem ao destino
+    int* caminho;
+
+    // Disância da origem ao destino
+    float distancia;
+    
+    // Declara variável de retorno
+    Tupla<int*, float> ret;
+
+    // Número de vértices que o caminho contém
+    int tamanho_caminho;
+
+    // Variável temporária para iterar pelo caminho pai pai
+    int pai;
+
+    // Se o grafo possuí pesos nas arestas
+    if(peso){
+        // A distância está na posição destino do vetor de distâncias encontrado por Dijkstra
+        distancia = Dijkstra(origem, destino)[destino];
+    } 
+    // Se o grafo não possui pesos nas arestas
+    else{
+        // É rodada uma BFS a partir da origem
+        BFS(origem);
+        // E a distância é o nível do vértice destino na árvore geradora
+        // Se o nível for -1, a origem e o destino estão em componentes conexas diferentes
+        // E a distância deve ser infinita
+        distancia = vertices[destino]->getNivel()!=-1?vertices[destino]->getNivel():INFINITY;
+    }
+
+    // Caminho começa com tamnho 0
+    tamanho_caminho = 0;
+
+    // Pai começa como o destino
+    pai = destino;
+
+    // Enquanto o pai não for -1
+    // Raiz tem pai -1
+    while(pai>=0){
+        // Redefine o pai
+        pai = vertices[pai]->getPai();
+        // Incrementa o caminho
+        tamanho_caminho++;
+    }
+
+    // Aloca memória para caminhi
+    caminho = (int*) malloc(sizeof(int)*tamanho_caminho);
+
+    // Pai começa como o destino
+    pai = destino;
+
+    // A partir do destino, percorrendo pai a pai
+    for(int i=tamanho_caminho-1;i>=0;i--){
+        // Coloca o pai no caminho
+        caminho[i] = pai;
+        // Redefine o pai
+        pai = vertices[pai]->getPai();
+    }
+
+    // Define a varíavel de retorno com o caminho e a distância
+    ret.elem1 = caminho;
+    ret.elem2 = distancia;
+
+    // Retorna
+    return ret;
+}
+
+// Escreve a árvore geradora mínima em um arquivo
+// Se o grafo não for conexo, escreve a floresta geradora mínima e a soma dos custos de todas as MSTs
+void MatrizAdjacencias::ArvoreGeradoraMinima(FILE* output){
+
+    // Vetor de custos
+    float* custo = Prim(0);
+
+    // Variável temporária para pai do vértice
+    int pai;
+
+    // Custo total da MST
+    float custo_total;
+
+    // Imprime tamnho da MST, que é o número de vértices do grafo
+    fprintf(output, "%d\n", n_vertices);
+
+    // Custo inicia como 0
+    custo_total = 0;
+
+    // Para todos os vértices do grafo
+    for(int i=0;i<n_vertices;i++){
+
+        // Pai do vértice i
+        pai = vertices[i]->getPai();
+
+        // Se o vértice está na MST
+        if(custo[i] != INFINITY && pai>=0){
+            // Imprime a aresta para o arquivo
+            fprintf(output, "%d %d %.2f\n", pai+1, i+1, custo[i]);
+            // Redefine custo do pai para que cada aresta seja contabilizada uma única vez
+            custo[pai] = INFINITY;
+            // Incrementa custo total
+            custo_total+=custo[i];
+        }
+    }
+    // Imprime o custo total
+    fprintf(output, "Custo total: %.2f\n", custo_total);
+}
+
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
 int MatrizAdjacencias::diametro()
 {
@@ -764,6 +888,74 @@ int MatrizAdjacencias::diametro()
     }
 
     return diametro;
+}
+
+// Retorna a maior distância entre o vértice e qualquer outro vértice do grafo
+float MatrizAdjacencias::excentricidade(int vertice){
+
+    // Vetor de distâncias 
+    float* dist;
+
+    // Maior distância a partir do vértice
+    float dist_max;
+
+    // Se o grafo possui pesos nas arestas
+    if(peso){
+        // Vetor de distâncias encontrado por Dijkstra
+        dist = Dijkstra(vertice);
+
+        // Distância máxima começada como 0
+        dist_max = 0;
+
+        // Para todos os vértices do grafo
+        for(int i=0;i<n_vertices;i++){
+            // Se a distância de i ao vértice for maior que a distância máxima, redefine a distância máxima
+            if(dist[i]!=INFINITY) dist_max = dist[i]>dist_max?dist[i]:dist_max; 
+        }
+    }
+
+    // Se o grafo não possui pesos nas arestas
+    else{
+        // Distâcia máxima equivale ao maior nível da árvore geradora da BFS a partir do vértice
+        dist_max = BFS(vertice);
+    }
+
+    // Retorna a maior distância
+    return dist_max;
+}
+
+// Retorna a média das distâncias de todos os pares de vértices do grafo
+float MatrizAdjacencias::DistanciaMedia(){
+
+    // Acumulador de distâncias
+    float dist_acum = 0;
+
+    // Nivel do vertice na arvore BFS
+    int nivel;
+
+    for(int i=0;i<n_vertices;i++){
+        // Se o grafo tem pesos nas arestas, adiciona as distâncias a partir de i ao acumulador
+        if(peso) dist_acum += Dijkstra(i)[n_vertices];
+        
+        // Se o grafo não possui peso nas arestas
+        else{ 
+
+            // Roda uma BFS a partir de i
+            BFS(i);
+
+            // Para todo vértice do grafo
+            for(int j=0;j<n_vertices;j++){
+                // Pega o nivel de j na árvore BFS a partir de i
+                nivel = vertices[j]->getNivel();
+
+                // Se j e i estão na mesma componente conexa, adiciona esse nivel ao acumulador
+                dist_acum += nivel>=0?nivel:0;
+            }
+        }
+    }
+
+    // Retorna média das distâncias
+    return dist_acum/(2*n_vertices*(n_vertices-1)/2);
 }
 
 // Função que percorre todas componentes conexas do grafo e retorna um vetor que associa cada CC ao seu tamanho
@@ -1301,6 +1493,7 @@ void ListaAdjacencias::DFS(int origem)
 }
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
+// Retorna um vetor de distâncias em que o último elemento guarda todas as distâncias acumuladas
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
 float* ListaAdjacencias::Dijkstra(int origem, int destino){
 
@@ -1312,7 +1505,10 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
     }
 
     // Aloca memória para vetor de distâncias
-    float* dist = (float*) malloc(sizeof(float)*n_vertices);
+    float* dist = (float*) malloc(sizeof(float)*(n_vertices+1));
+
+    // Define acumulador de distâncias
+    float dist_acum = 0;
 
     // Aloca memória para vetor de pais temporários
     int* pai = (int*) malloc(sizeof(int*)*n_vertices);
@@ -1320,6 +1516,7 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
     // Varíavel para nível inicial
     int nivel = 0;
 
+    // Define min heap
     Heap h(n_vertices, false);
 
     // Tupla temporária
@@ -1362,6 +1559,9 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
         // t é o vértice restante com menor distância até a origem no momento
         t = h.extract();
 
+        // Adiciona distância do vértice selecionado ao acumulador de distâncias
+        dist_acum += dist[t->elem1]!=INFINITY?dist[t->elem1]:0;
+
         // Define pai e nível do vértice selecionado na árvore geradora
         vertices[t->elem1]->setPai(pai[t->elem1]);
         if(pai[t->elem1]>0) nivel = vertices[pai[t->elem1]]->getNivel()+1;                
@@ -1382,14 +1582,16 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
             // Se a distância do vizinho a origem for maior que a distância do vértice mais o peso da aresta
             if(dist[vizinho.elem1] > dist[t->elem1] + vizinho.elem2){
 
-                // Define um contador para achar o vizinho na heap
-                int i = 0;
+                // Define indice do vizinho na heap
+                int i = h.getIndex(&vizinho);
 
-                i = h.getIndex(&vizinho);
-
+                // Se o vizinho ainda está na heap
                 if (i != -1){
+                    // Atualiza menor distância
                     dist[vizinho.elem1] = dist[t->elem1] + vizinho.elem2;
+                    // Define pai temporário
                     pai[vizinho.elem1] = t->elem1;
+                    //Atualiza valor na heap
                     h.change(i, dist[vizinho.elem1]);
                 }
             }
@@ -1398,6 +1600,10 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
             pListaAdjacencias = pListaAdjacencias->prox;
         }
     }
+
+    // Adiona soma das distâncias ao final do vetor de distâncias
+    dist[n_vertices] = dist_acum;
+
     // Retorna o vetor de distâncias
     return dist;
 }
@@ -1492,6 +1698,117 @@ float* ListaAdjacencias::Prim(int origem){
     return custo;
 }
 
+// Retorna o caminho mínimo e a distânica da origem ao destino
+// Se origem e destino estão em componentes conexas diferentes
+// Distância é infinita e caminho é apenas o destino
+Tupla<int*, float> ListaAdjacencias::CaminhoMinimo(int origem, int destino){
+
+    // Vetor de índices referente ao caminho da origem ao destino
+    int* caminho;
+
+    // Disância da origem ao destino
+    float distancia;
+    
+    // Declara variável de retorno
+    Tupla<int*, float> ret;
+
+    // Número de vértices que o caminho contém
+    int tamanho_caminho;
+
+    // Variável temporária para iterar pelo caminho pai pai
+    int pai;
+
+    // Se o grafo possuí pesos nas arestas
+    if(peso){
+        // A distância está na posição destino do vetor de distâncias encontrado por Dijkstra
+        distancia = Dijkstra(origem, destino)[destino];
+    } 
+    // Se o grafo não possui pesos nas arestas
+    else{
+        // É rodada uma BFS a partir da origem
+        BFS(origem);
+        // E a distância é o nível do vértice destino na árvore geradora
+        // Se o nível for -1, a origem e o destino estão em componentes conexas diferentes
+        // E a distância deve ser infinita
+        distancia = vertices[destino]->getNivel()!=-1?vertices[destino]->getNivel():INFINITY;
+    }
+
+    // Caminho começa com tamnho 0
+    tamanho_caminho = 0;
+
+    // Pai começa como o destino
+    pai = destino;
+
+    // Enquanto o pai não for -1
+    // Raiz tem pai -1
+    while(pai>=0){
+        // Redefine o pai
+        pai = vertices[pai]->getPai();
+        // Incrementa o caminho
+        tamanho_caminho++;
+    }
+
+    // Aloca memória para caminhi
+    caminho = (int*) malloc(sizeof(int)*tamanho_caminho);
+
+    // Pai começa como o destino
+    pai = destino;
+
+    // A partir do destino, percorrendo pai a pai
+    for(int i=tamanho_caminho-1;i>=0;i--){
+        // Coloca o pai no caminho
+        caminho[i] = pai;
+        // Redefine o pai
+        pai = vertices[pai]->getPai();
+    }
+
+    // Define a varíavel de retorno com o caminho e a distância
+    ret.elem1 = caminho;
+    ret.elem2 = distancia;
+
+    // Retorna
+    return ret;
+}
+
+// Escreve a árvore geradora mínima em um arquivo
+// Se o grafo não for conexo, escreve a floresta geradora mínima e a soma dos custos de todas as MSTs
+void ListaAdjacencias::ArvoreGeradoraMinima(FILE* output){
+
+    // Vetor de custos
+    float* custo = Prim(0);
+
+    // Variável temporária para pai do vértice
+    int pai;
+
+    // Custo total da MST
+    float custo_total;
+
+    // Imprime tamnho da MST, que é o número de vértices do grafo
+    fprintf(output, "%d\n", n_vertices);
+
+    // Custo inicia como 0
+    custo_total = 0;
+
+    // Para todos os vértices do grafo
+    for(int i=0;i<n_vertices;i++){
+
+        // Pai do vértice i
+        pai = vertices[i]->getPai();
+
+        // Se o vértice está na MST
+        if(custo[i] != INFINITY && pai>=0){
+            // Imprime a aresta para o arquivo
+            fprintf(output, "%d %d %.2f\n", pai+1, i+1, custo[i]);
+            // Redefine custo do pai para que cada aresta seja contabilizada uma única vez
+            custo[pai] = INFINITY;
+            // Incrementa custo total
+            custo_total+=custo[i];
+        }
+    }
+    // Imprime o custo total
+    fprintf(output, "Custo total: %.2f\n", custo_total);
+}
+
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
 int ListaAdjacencias::diametro()
 {
@@ -1525,6 +1842,74 @@ int ListaAdjacencias::diametro()
 
     // Retorna diâmetro do grafo
     return diametro;
+}
+
+// Retorna a maior distância entre o vértice e qualquer outro vértice do grafo
+float ListaAdjacencias::excentricidade(int vertice){
+
+    // Vetor de distâncias 
+    float* dist;
+
+    // Maior distância a partir do vértice
+    float dist_max;
+
+    // Se o grafo possui pesos nas arestas
+    if(peso){
+        // Vetor de distâncias encontrado por Dijkstra
+        dist = Dijkstra(vertice);
+
+        // Distância máxima começada como 0
+        dist_max = 0;
+
+        // Para todos os vértices do grafo
+        for(int i=0;i<n_vertices;i++){
+            // Se a distância de i ao vértice for maior que a distância máxima, redefine a distância máxima
+            if(dist[i]!=INFINITY) dist_max = dist[i]>dist_max?dist[i]:dist_max; 
+        }
+    }
+
+    // Se o grafo não possui pesos nas arestas
+    else{
+        // Distâcia máxima equivale ao maior nível da árvore geradora da BFS a partir do vértice
+        dist_max = BFS(vertice);
+    }
+
+    // Retorna a maior distância
+    return dist_max;
+}
+
+// Retorna a média das distâncias de todos os pares de vértices do grafo
+float ListaAdjacencias::DistanciaMedia(){
+
+    // Acumulador de distâncias
+    float dist_acum = 0;
+
+    // Nivel do vertice na arvore BFS
+    int nivel;
+
+    for(int i=0;i<n_vertices;i++){
+        // Se o grafo tem pesos nas arestas, adiciona as distâncias a partir de i ao acumulador
+        if(peso) dist_acum += Dijkstra(i)[n_vertices];
+        
+        // Se o grafo não possui peso nas arestas
+        else{ 
+
+            // Roda uma BFS a partir de i
+            BFS(i);
+
+            // Para todo vértice do grafo
+            for(int j=0;j<n_vertices;j++){
+                // Pega o nivel de j na árvore BFS a partir de i
+                nivel = vertices[j]->getNivel();
+
+                // Se j e i estão na mesma componente conexa, adiciona esse nivel ao acumulador
+                dist_acum += nivel>=0?nivel:0;
+            }
+        }
+    }
+
+    // Retorna média das distâncias
+    return dist_acum/(2*n_vertices*(n_vertices-1)/2);
 }
 
 // Função que percorre todas componentes conexas do grafo, as ordena dentro de um vetor e retorna a quantidade de CCs

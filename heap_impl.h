@@ -159,7 +159,7 @@ Tupla<int,float>* Heap::extract(){
     // Se a heap não está vazia
     if(ultimo>=0){
         // Passa o último elemento para a raiz
-        buffer[0] = buffer[ultimo-1];
+        swap(0,ultimo-1);
         // Decrementa o índicedo final da heap
         ultimo--;
     }
