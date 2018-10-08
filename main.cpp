@@ -5,6 +5,7 @@
 #include <string>
 #include "grafo.h"
 #include "tupla.h"
+#include <sys/time.h>
 
 using namespace std;
 
@@ -41,18 +42,50 @@ using namespace std;
      //   printf("raiz extraida: (%d, %.1f)\n", t10->elem1, t10->elem2);
     //} */
 
+long getMicrotime(){
+	struct timeval currentTime;
+	gettimeofday(&currentTime, NULL);
+	return currentTime.tv_sec * (int)1e6 + currentTime.tv_usec;
+}
+
 int main(){
 
     FILE* pFileIn;
+    FILE* pFileOut;
 
-    pFileIn = fopen("grafo_teste.txt", "r");
+    long inicio, fim;
 
-    MatrizAdjacencias G(pFileIn, true);
+    double duracao;
 
-    float* dist = G.Dijkstra(0);
+    pFileIn = fopen("grafo_5.txt", "r");
+    pFileOut = fopen("resultados_grafo_1.txt", "a");
 
-    for(int i=0;i<16;i++){
-        printf("Custo de %d: %f\n", i+1, dist[i]);
-        printf("Pai de %d: %d\n", i+1, G.getVertices()[i]->getPai()+1);
+    ListaAdjacencias G(pFileIn, true);
+
+    inicio = getMicrotime();
+
+    G.Dijkstra(9);
+
+    fim = getMicrotime();
+
+    duracao = (fim-inicio) / 1000;
+
+    printf("%lf\n", duracao);
+
+/*     for (int j = 9; j <= 49; j+=10){
+
+        Tupla<int*,float> gosto = G.CaminhoMinimo(0,j);
+
+        printf("Distância até 10: %f\n", gosto.elem2);
+
+        printf("Caminho: ");
+        for(int i = 1; i<=gosto.elem1[0];i++){
+            printf("(%d) ",gosto.elem1[i]+1);
+        }
+        printf("\n");
+
+        printf("Excentricidade de %d: %f\n\n", j+1, G.excentricidade(j));
+
     }
+ */
 }
