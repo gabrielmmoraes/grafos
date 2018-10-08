@@ -1749,18 +1749,21 @@ Tupla<int*, float> ListaAdjacencias::CaminhoMinimo(int origem, int destino){
     }
 
     // Aloca memória para caminhi
-    caminho = (int*) malloc(sizeof(int)*tamanho_caminho);
+    caminho = (int*) malloc(sizeof(int)*(tamanho_caminho+1));
 
     // Pai começa como o destino
     pai = destino;
 
     // A partir do destino, percorrendo pai a pai
-    for(int i=tamanho_caminho-1;i>=0;i--){
+    for(int i=tamanho_caminho;i>0;i--){
+        
         // Coloca o pai no caminho
         caminho[i] = pai;
+        
         // Redefine o pai
         pai = vertices[pai]->getPai();
     }
+    caminho[0] = tamanho_caminho;
 
     // Define a varíavel de retorno com o caminho e a distância
     ret.elem1 = caminho;

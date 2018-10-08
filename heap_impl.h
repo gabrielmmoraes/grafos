@@ -9,6 +9,7 @@ using namespace std;
 // Inicializa uma heap vazia de tamanho t_max.
 // O valor booleano max determina se a heap é máxima ou mínima. Se true, heap máxima. 
 Heap::Heap(int t_max, bool max){    
+    
     // Define o tamanho máximo da heap
     tamanho_max = t_max; 
     
@@ -67,7 +68,8 @@ void Heap::swap(int i, int j){
     // Variável temporária com o valor de i
     Tupla<int,float>* tmp = buffer[i];
 
-    // Variável temporária com o valor do index dentro da heap do vértice armazenado na tupla em buffer[i]
+    // Variável temporária com o valor do index dentro da heap
+    // referente ao vértice armazenado na tupla em buffer[i]
     int tmp1 = buffer_index[buffer[i]->elem1];
 
     buffer_index[buffer[i]->elem1] = buffer_index[buffer[j]->elem1];
@@ -75,6 +77,7 @@ void Heap::swap(int i, int j){
     // Move o valor de j para posição i
     buffer[i] = buffer[j];
 
+    // Index do elemento em j passa a ser tmp1
     buffer_index[buffer[j]->elem1] = tmp1;
 
     // Move variável temporária (valor de i) para posição j
@@ -108,6 +111,7 @@ void Heap::insert(Tupla<int,float>* novo_item){
     // Variáveis temporárias para reordenação da heap
     // nó é o elemento inserido
     int no = ultimo-1;
+    
     // pai é o seu pai na árvore da heap
     int pai;
 
@@ -282,7 +286,7 @@ void Heap::change(int no, float novo_valor){
     // Se a heap for mínima e o novo valor for maior ao anterior
     if(!e_max_heap && novo_valor > buffer[no]->elem2){
     
-        //Informa o usuário e termina a função
+        // Informa o usuário e termina a função
         printf("O novo valor deve ser menor que o anterior.\n");
     
         return;
@@ -313,6 +317,7 @@ void Heap::change(int no, float novo_valor){
             }
             // Se o valor do pai for maior que o valor do no, interrompe o loop
             else break;
+        
         // Se a heap for mínima
         }else{
             // Se o valor do pai for maior que o valor do no
@@ -328,6 +333,7 @@ void Heap::change(int no, float novo_valor){
     }
 }
 
+// Dado um ponteiro de tupla, retorna seu index na heap
 int Heap::getIndex(Tupla<int,float>* tupla){
     return buffer_index[tupla->elem1];
 }
