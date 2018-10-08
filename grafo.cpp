@@ -1104,51 +1104,51 @@ vector<Tupla<int, int> > MatrizAdjacencias::componentesConexos()
 //Função para analisar as componentes conexas com relação a tamanho e elementos que as formam
 Lista** MatrizAdjacencias::analiseComponentesConexos()
 {
-    //Declara a tupla que será retirada da heap
+    // Declara a tupla que será retirada da heap
     Tupla<int, int> t;
 
-    //Acha todas as componentes conexas
+    // Acha todas as componentes conexas
     vector<Tupla<int, int> > ccs = componentesConexos();
 
-    //Declara o vetor de listas que guardará as componentes ordenadas
+    // Declara o vetor de listas que guardará as componentes ordenadas
     Lista** componentesConexas = (Lista**) malloc(sizeof(Lista*) * ccs.size()) ;
     
-    //Inicia o contador de componentes
+    // Inicia o contador de componentes
     int c = 0;
 
-    //Função padrão para transformar o vector em heapmax 
+    // Função padrão para transformar o vector em heapmax 
     make_heap(ccs.begin(),ccs.end());
     
-    //Enquanto a heap não estiver vazia
+    // Enquanto a heap não estiver vazia
     while(!ccs.empty()){
     
-        //Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
+        // Pega primeira tupla da heap (componente de maior tamanho dentre as restantes)
         pop_heap(ccs.begin(),ccs.end());
         t = ccs.back();
 
-        //Remove essa tupla da heap
+        // Remove essa tupla da heap
         ccs.pop_back();
     
-        //Inicia a lista para a componente conexa c
+        // Inicia a lista para a componente conexa c
         componentesConexas[c] = new Lista();
 
-        //Define o primeiro elemento da lista como o identificador da componente
+        // Define o primeiro elemento da lista como o identificador da componente
         componentesConexas[c]->push(t.elem1);
 
-        //Para todos os vértices marcados com o identificador da componente
+        // Para todos os vértices marcados com o identificador da componente
         for(int i=0;i<n_vertices;i++)
         {
             if(vertices[i]->getMarcacao()==t.elem1){
-                //Insere o identificador do vértice na lista
+                // Insere o identificador do vértice na lista
                 componentesConexas[c]->push(i);
             }
         }
 
-        //Incrementa o contador de componentes
+        // Incrementa o contador de componentes
         c++;
     }
 
-    //Retorna o vetor de listas de componentes em ordem decrescente
+    // Retorna o vetor de listas de componentes em ordem decrescente
     return componentesConexas;
 }
 
