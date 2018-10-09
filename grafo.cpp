@@ -1495,6 +1495,7 @@ void ListaAdjacencias::DFS(int origem)
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
 // Retorna um vetor de distâncias em que o último elemento guarda todas as distâncias acumuladas
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
+// Obs.: É preciso dar free no array de retorno dentro da main, após seu uso
 float* ListaAdjacencias::Dijkstra(int origem, int destino){
 
     // Se há pesos negativos
@@ -1511,7 +1512,7 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
     float dist_acum = 0;
 
     // Aloca memória para vetor de pais temporários
-    int* pai = (int*) malloc(sizeof(int*)*n_vertices);
+    int* pai = (int*) malloc(sizeof(int)*n_vertices);
 
     // Varíavel para nível inicial
     int nivel = 0;
@@ -1529,16 +1530,21 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
     // Para todos os vértices
     for(int i=0;i<n_vertices;i++){
 
+        // Aloca memória para tupla
         t = (Tupla<int,float>*) malloc(sizeof(Tupla<int,float>));
 
         // Tupla recebe o índice do vértice
         t->elem1 = i;
+        
         // E a distância inicial infinita
         t->elem2 = INFINITY;
+        
         // Tupla adicionada no vector
         h.insert(t);
+        
         // Distancia inicial infinita
         dist[i] = INFINITY;
+        
         // Inicialmente nenhum vértice tem pai
         pai[i] = -2;
     }
@@ -1604,12 +1610,21 @@ float* ListaAdjacencias::Dijkstra(int origem, int destino){
     // Adiona soma das distâncias ao final do vetor de distâncias
     dist[n_vertices] = dist_acum;
 
+    // Libera memória usada pelo vetor de pais
+    free(pai);
+
+    for (int i = 0; i<n_vertices;i++) free(h.buffer[i]);
+
     // Retorna o vetor de distâncias
     return dist;
 }
 
 // Algoritmo de árvore geradora mínima a partir da origem
+// Obs.: É preciso dar free no array de custo na main, após seu uso
 float* ListaAdjacencias::Prim(int origem){
+
+    // Variável iteradora de for
+    int i;
 
     // Aloca memória para vetor de custos
     float* custo = (float*) malloc(sizeof(float)*n_vertices);
@@ -1629,17 +1644,23 @@ float* ListaAdjacencias::Prim(int origem){
     ListNode* pListaAdjacencias;
 
     // Para todos os vértices
-    for(int i=0;i<n_vertices;i++){
+    for(i=0;i<n_vertices;i++){
+
+        // Aloca memória para Tupla
         t = (Tupla<int,float>*) malloc(sizeof(Tupla<int,float>));
 
         // Tupla recebe o índice do vértice
         t->elem1 = i;
+        
         // E a distância inicial infinita
         t->elem2 = INFINITY;
+        
         // Tupla adicionada no vector
         h.insert(t);
+        
         // Distancia inicial infinita
         custo[i] = INFINITY;
+        
         // Inicialmente nenhum vértice tem pai
         pai[i] = -2;
     }
@@ -1694,6 +1715,9 @@ float* ListaAdjacencias::Prim(int origem){
         }
     }
 
+    // Libera o vetor de pais
+    free(pai);
+
     // Retorna o vetor de distâncias
     return custo;
 }
@@ -1701,6 +1725,7 @@ float* ListaAdjacencias::Prim(int origem){
 // Retorna o caminho mínimo e a distânica da origem ao destino
 // Se origem e destino estão em componentes conexas diferentes
 // Distância é infinita e caminho é apenas o destino
+// Obs.: É preciso dar free dentro da main, após o uso da função
 Tupla<int*, float> ListaAdjacencias::CaminhoMinimo(int origem, int destino){
 
     // Vetor de índices referente ao caminho da origem ao destino
@@ -1748,7 +1773,7 @@ Tupla<int*, float> ListaAdjacencias::CaminhoMinimo(int origem, int destino){
         tamanho_caminho++;
     }
 
-    // Aloca memória para caminhi
+    // Aloca memória para caminho
     caminho = (int*) malloc(sizeof(int)*(tamanho_caminho+1));
 
     // Pai começa como o destino
@@ -1768,6 +1793,8 @@ Tupla<int*, float> ListaAdjacencias::CaminhoMinimo(int origem, int destino){
     // Define a varíavel de retorno com o caminho e a distância
     ret.elem1 = caminho;
     ret.elem2 = distancia;
+
+    //free(caminho);
 
     // Retorna
     return ret;
@@ -1808,8 +1835,12 @@ void ListaAdjacencias::ArvoreGeradoraMinima(FILE* output){
             custo_total+=custo[i];
         }
     }
+    
     // Imprime o custo total
     fprintf(output, "Custo total: %.2f\n", custo_total);
+
+    // Libera memória usada pelo custo
+    free(custo);
 }
 
 //Calcula a maior distância no grafo. Retorna -1 se o grafo não or conexo
@@ -1866,9 +1897,12 @@ float ListaAdjacencias::excentricidade(int vertice){
 
         // Para todos os vértices do grafo
         for(int i=0;i<n_vertices;i++){
+            
             // Se a distância de i ao vértice for maior que a distância máxima, redefine a distância máxima
             if(dist[i]!=INFINITY) dist_max = dist[i]>dist_max?dist[i]:dist_max; 
         }
+
+        free(dist);
     }
 
     // Se o grafo não possui pesos nas arestas
@@ -1890,10 +1924,17 @@ float ListaAdjacencias::DistanciaMedia(){
     // Nivel do vertice na arvore BFS
     int nivel;
 
+    float* dist;
+
     for(int i=0;i<n_vertices;i++){
-        // Se o grafo tem pesos nas arestas, adiciona as distâncias a partir de i ao acumulador
-        if(peso) dist_acum += Dijkstra(i)[n_vertices];
         
+        // Se o grafo tem pesos nas arestas, adiciona as distâncias a partir de i ao acumulador
+        if(peso){
+            dist = Dijkstra(i);
+            dist_acum += dist[n_vertices];
+            free(dist);
+        }
+
         // Se o grafo não possui peso nas arestas
         else{ 
 
@@ -1902,6 +1943,7 @@ float ListaAdjacencias::DistanciaMedia(){
 
             // Para todo vértice do grafo
             for(int j=0;j<n_vertices;j++){
+                
                 // Pega o nivel de j na árvore BFS a partir de i
                 nivel = vertices[j]->getNivel();
 

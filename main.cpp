@@ -57,14 +57,23 @@ int main(){
 
     double duracao;
 
-    pFileIn = fopen("grafo_5.txt", "r");
-    pFileOut = fopen("resultados_grafo_1.txt", "a");
+    pFileIn = fopen("grafo_teste.txt", "r");
 
     ListaAdjacencias G(pFileIn, true);
 
     inicio = getMicrotime();
 
-    G.Dijkstra(9);
+    for (int i = 0; i<15; i++) {
+        float oi = G.excentricidade(i);
+    
+        //for(int j = 0; j<15;j++){
+            printf("Dist de med %d é %.1f\n", i+1, oi);
+        //}
+    
+        printf("\n\n");
+
+//        free(oi);
+    }
 
     fim = getMicrotime();
 

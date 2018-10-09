@@ -53,8 +53,18 @@ Heap::Heap(Tupla<int,float>** vetor, int t_vetor, int t_max, bool max){
 
 // Destrutor da heap
 Heap::~Heap(){
-    // Libera a memória ocupada pela heap
+    
+    /* for(int i = 0; i<tamanho_max;i++){
+
+        // Libera a memória ocupada pela heap
+        free(buffer[i]);
+    } */
+
     free(buffer);
+
+
+    // Libera a memória ocupada pelo array de index
+    free(buffer_index);
 }
 
 // Retorna true sse a heap estiver vazia
@@ -266,6 +276,9 @@ Tupla<int,float>* Heap::extract(){
         }
     } 
 
+    // Libera memória do último elemento da heap
+    //free(buffer[ultimo]);
+
     // Retorna a raiz
     return raiz;
 }
@@ -312,6 +325,7 @@ void Heap::change(int no, float novo_valor){
         
                 // Troca o pai com o no
                 swap(no, pai);
+                
                 // Redefine a posição do no
                 no = pai;
             }
