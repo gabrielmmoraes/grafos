@@ -11,16 +11,19 @@ using namespace std;
 class Vertice
 {
   public:
-    Vertice();
+    Vertice(float x=0, float y=0);
 
     int getGrau();
     int getPai();
     int getNivel();
+    float getPosX();
+    float getPosY();
     int getMarcacao();
 
     void incrementaGrau();
     void setPai(int v);
     void setNivel(int n);
+    void setPos(float x, float y);
     void desmarca();
     void marca(int i = 1);
 
@@ -30,6 +33,8 @@ class Vertice
     int marcacao;
     int pai;
     int nivel;
+    float pos_x;
+    float pos_y;
 };
 
 class Aresta
@@ -71,6 +76,7 @@ class MatrizAdjacencias : public Grafo
   public:
     MatrizAdjacencias(int n, bool p);
     ~MatrizAdjacencias();
+    MatrizAdjacencias(FILE *pontos);
     MatrizAdjacencias(FILE *input, bool p);
 
     int getNVertices();
@@ -105,6 +111,7 @@ class ListaAdjacencias : public Grafo
   public:
     ListaAdjacencias(int n, bool p);
     ~ListaAdjacencias();
+    ListaAdjacencias(FILE *pontos);
     ListaAdjacencias(FILE *input, bool p);
 
     int getNVertices();

@@ -18,7 +18,7 @@ struct greater1{
 }; 
 
 // Inicializa um vértice
-Vertice::Vertice()
+Vertice::Vertice(float x, float y)
 {
     // Todo vértice possui grau zero até seus vizinhos serem analisador
     grau = 0;
@@ -34,6 +34,10 @@ Vertice::Vertice()
 
     // Inicializando nível como -1
     nivel = -1;
+
+    //Inicializando posição com os argumentos passados (padrão na origem do plano cartesiano)
+    pos_x = x;
+    pos_y = y;
 }
 
 // Retorna grau do vértice
@@ -52,6 +56,18 @@ int Vertice::getPai()
 int Vertice::getNivel()
 {
     return nivel;
+}
+
+//Retorna posição do vértice no eixo x
+float Vertice::getPosX()
+{
+    return pos_x;
+}
+
+//Retorna posição do vértice no eixo y
+float Vertice::getPosY()
+{
+    return pos_y;
 }
 
 // Retorna marcação  do vértice
@@ -77,6 +93,13 @@ void Vertice::setPai(int v)
 void Vertice::setNivel(int n)
 {
     nivel = n;
+}
+
+//Define posição do vértice
+void Vertice::setPos(float x, float y)
+{
+    pos_x = x;
+    pos_y = y;
 }
 
 // Desmarca o vértice e retorna pai e nível para seus valores de inicialização
@@ -247,6 +270,62 @@ MatrizAdjacencias::MatrizAdjacencias(int n, bool p)
     }
 }
 
+// Constrói uma matriz de adjacências a partir de um arquivo com pontos pertencentes a um plano
+MatrizAdjacencias::MatrizAdjacencias(FILE *pontos)
+{
+    // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
+    fscanf(pontos, "%d", &n_vertices);
+
+    // Inicializa o número de arestas como 0    
+    n_arestas = 0;
+
+    // Inicializa a flag de peso como true
+    peso = true;
+
+    // Inicializa a flag de pesos negativos como falsa
+    pesos_negativos = false;
+
+    // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
+    // Com isso conseguimos guardar características de cada vértice
+    vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
+    
+    // Cria uma lista de ponteiros para listas, simulando uma matriz de tamanho n_vertice^2
+    // Com isso conseguimos acessar a relação entre dois vértices em tempo O(1)
+    adjacencias = (float **)malloc(sizeof(float *) * n_vertices);
+    
+    // Declaração das coordenadas que serão lidas do arquivo
+    float x,y;
+
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma linha da matriz de tamanho n_vertice
+    for (int i = 0; i < n_vertices; i++)
+    {
+        fscanf(pontos, "%f %f", &x, &y);
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
+        vertices[i] = new Vertice(x,y);
+    }
+
+    float dist;
+    // Define os pesos de todas as arestas
+    for (int i = 0; i < n_vertices; i++)
+    {
+        // Cria linha da matriz com tamanho n_vertices
+        adjacencias[i] = (float *)malloc(sizeof(float)*n_vertices);
+        for (int j = 0; j < n_vertices; j++)
+        {
+            // Calcula a distância entre i e j
+            x = (vertices[i]->getPosX()-vertices[j]->getPosX());
+            y = (vertices[i]->getPosY()-vertices[j]->getPosY());
+            x *= x;
+            y *= y;
+            dist = sqrt(x+y);
+
+            // Define o peso da aresta como essa distância
+            setAdjacencia(i+1,j+1,dist);
+        }
+    
+    }
+}
+
 // Constrói uma matriz de adjacência a partir da descrição de um grafo dentro de um arquivo
 MatrizAdjacencias::MatrizAdjacencias(FILE *input, bool p)
 {
@@ -302,7 +381,6 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *input, bool p)
         setAdjacencia(v1, v2, w);
     }
 }
-
 
 // Destrutor da Matriz de Adjacência. Libera o espaço de memória usado pela matriz e pela lista de vértices
 MatrizAdjacencias::~MatrizAdjacencias()
@@ -1178,6 +1256,62 @@ ListaAdjacencias::ListaAdjacencias(int n, bool p)
 
         // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências
         adjacencias[i] = new Lista();
+    }
+}
+
+// Constrói uma matriz de adjacências a partir de um arquivo com pontos pertencentes a um plano
+ListaAdjacencias::ListaAdjacencias(FILE *pontos)
+{
+    // Lê a primeira linha do programa e guarda o inteiro como o número de vértices total
+    fscanf(pontos, "%d", &n_vertices);
+
+    // Inicializa o número de arestas como 0
+    n_arestas = 0;
+
+    // Inicializa a flag de pesos com o argumento passado
+    peso = true;
+
+    // Inicializa a flag de pesos negativos como false
+    pesos_negativos = false;
+
+    // Cria uma lista de ponteiros para elementos de classe Vertice (tamanho n_vertices)
+    // Com isso conseguimos guardar características de cada vértice
+    vertices = (Vertice **)malloc(sizeof(Vertice *) * n_vertices);
+
+    // Cria uma lista de ponteiros para elementos de classe Lista (tamanho n_vertices))
+    // Com isso conseguimos gaurdar listas encadeadas para vizinhos de cada vértice
+    adjacencias = (Lista **)malloc(sizeof(Lista *) * n_vertices);
+
+    // Declaração das coordenadas que serão lidas do arquivo
+    float x,y;
+
+    // Para cada n_vertice, inicializa-se uma classe Vertice e uma linha da matriz de tamanho n_vertice
+    for (int i = 0; i < n_vertices; i++)
+    {
+        fscanf(pontos, "%f %f", &x, &y);
+        // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
+        vertices[i] = new Vertice(x,y);
+    }
+
+    float dist;
+    // Define os pesos de todas as arestas
+    for (int i = 0; i < n_vertices; i++)
+    {
+        // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências 
+        adjacencias[i] = new Lista();
+        for (int j = 0; j < n_vertices; j++)
+        {
+            // Calcula a distância entre i e j
+            x = (vertices[i]->getPosX()-vertices[j]->getPosX());
+            y = (vertices[i]->getPosY()-vertices[j]->getPosY());
+            x *= x;
+            y *= y;
+            dist = sqrt(x+y);
+
+            // Define o peso da aresta como essa distância
+            setAdjacencia(i+1,j+1,dist);
+        }
+    
     }
 }
 
