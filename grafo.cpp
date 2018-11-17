@@ -846,8 +846,6 @@ void MatrizAdjacencias::ArvoreGeradoraMinima(FILE* output){
         if(custo[i] != INFINITY && pai>=0){
             // Imprime a aresta para o arquivo
             fprintf(output, "%d %d %.2f\n", pai+1, i+1, custo[i]);
-            // Redefine custo do pai para que cada aresta seja contabilizada uma única vez
-            custo[pai] = INFINITY;
             // Incrementa custo total
             custo_total+=custo[i];
         }
@@ -1228,6 +1226,9 @@ ListaAdjacencias::ListaAdjacencias(FILE *input, bool p)
         if(p) leitura = fscanf(input, "%d %d %f", &v1, &v2, &w);
         
         else leitura = fscanf(input, "%d %d", &v1, &v2);
+
+        printf("%d %d %f\n", v1, v2, w);
+        printf("leitura: %d\n", leitura);
 
         if(leitura == EOF) break;
         // Se o índice de qualquer um dos vértices na linha lida for maior que o n_vertice, descarta-se a informação
@@ -1829,8 +1830,6 @@ void ListaAdjacencias::ArvoreGeradoraMinima(FILE* output){
         if(custo[i] != INFINITY && pai>=0){
             // Imprime a aresta para o arquivo
             fprintf(output, "%d %d %.2f\n", pai+1, i+1, custo[i]);
-            // Redefine custo do pai para que cada aresta seja contabilizada uma única vez
-            custo[pai] = INFINITY;
             // Incrementa custo total
             custo_total+=custo[i];
         }
