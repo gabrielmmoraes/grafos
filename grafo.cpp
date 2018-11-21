@@ -302,15 +302,19 @@ MatrizAdjacencias::MatrizAdjacencias(FILE *pontos)
         fscanf(pontos, "%f %f", &x, &y);
         // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice(x,y);
+
+        // Cria linha da matriz com tamanho n_vertices
+        adjacencias[i] = (float *)malloc(sizeof(float)*n_vertices);
+
+        // Define aresta entre o vértice e si mesmo como 0
+        adjacencias[i][i] = 0;
     }
 
     float dist;
     // Define os pesos de todas as arestas
     for (int i = 0; i < n_vertices; i++)
     {
-        // Cria linha da matriz com tamanho n_vertices
-        adjacencias[i] = (float *)malloc(sizeof(float)*n_vertices);
-        for (int j = 0; j < n_vertices; j++)
+        for (int j = i+1; j < n_vertices; j++)
         {
             // Calcula a distância entre i e j
             x = (vertices[i]->getPosX()-vertices[j]->getPosX());
@@ -618,6 +622,35 @@ void MatrizAdjacencias::DFS(int origem)
     free(listaTupla);
 }
 
+// Encontra aproximação (PÉSSIMA) para problema do caixeiro viajante
+Tupla<int*, float> MatrizAdjacencias::TSP()
+{
+    // Tupla de retorno da função
+    Tupla<int*, float> t;
+    
+    // Vetor de pais com o caminho
+    int* caminho;
+    
+    // Peso total do caminho encontrado
+    float peso = adjacencias[0][n_vertices-1];
+
+    // Aloca memória para caminho
+    caminho = (int*) malloc(sizeof(int)*n_vertices);
+
+    // Define caminho
+    caminho[0] = n_vertices-1;
+    for (int i = 1;i < n_vertices; i++)
+    {
+        caminho[i] = i-1;
+        peso += adjacencias[i][i-1];
+    }
+
+    t.elem1 = caminho;
+    t.elem2 = peso;
+
+    return t;
+}
+
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
 // Retorna um vetor de distâncias em que o último elemento guarda todas as distâncias acumuladas
 // Se o destino for -1, calcula a menor distância a partir da origem para todo o grafo
@@ -873,7 +906,7 @@ Tupla<int*, float> MatrizAdjacencias::CaminhoMinimo(int origem, int destino){
         tamanho_caminho++;
     }
 
-    // Aloca memória para caminhi
+    // Aloca memória para caminho
     caminho = (int*) malloc(sizeof(int)*tamanho_caminho);
 
     // Pai começa como o destino
@@ -1291,15 +1324,16 @@ ListaAdjacencias::ListaAdjacencias(FILE *pontos)
         fscanf(pontos, "%f %f", &x, &y);
         // Criando novo vértice e retornando seu ponteiro à lista de ponteiros para Vertices
         vertices[i] = new Vertice(x,y);
+
+        // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências 
+        adjacencias[i] = new Lista();
     }
 
     float dist;
     // Define os pesos de todas as arestas
     for (int i = 0; i < n_vertices; i++)
     {
-        // Criando nova listae retornando seu ponteiro à lista de ponteiros para Listas de Adjacências 
-        adjacencias[i] = new Lista();
-        for (int j = 0; j < n_vertices; j++)
+        for (int j = i+1; j < n_vertices; j++)
         {
             // Calcula a distância entre i e j
             x = (vertices[i]->getPosX()-vertices[j]->getPosX());

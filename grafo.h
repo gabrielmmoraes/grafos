@@ -2,7 +2,7 @@
 #define GRAFO_H
 
 #include <iostream>
-#include<vector>
+#include <vector>
 #include "tupla.h"
 #include "lista.h"
 
@@ -86,6 +86,8 @@ class MatrizAdjacencias : public Grafo
 
     int BFS(int origem);
     void DFS(int origem);
+
+    Tupla<int*, float> TSP();
 
     float* Dijkstra(int origem, int destino=-1);
     float* Prim(int origem);
