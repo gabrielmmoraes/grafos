@@ -10,17 +10,17 @@ int main(){
 
     pFileIn = fopen("points-5.txt","r");
 
-    MatrizAdjacencias G(pFileIn);
+    ListaAdjacencias G(pFileIn);
 
-    Tupla<int*, float> t = G.TSP_lexicografico();
+    /* Tupla<int*, float> t = G.TSP_lexicografico();
 
     printf("Caminho léxico: %f\t\n",t.elem2);
     for(int i=0;i<5;i++){
         printf("%d; ",t.elem1[i]+1);
     }
-    printf("\n\n");
+    printf("\n\n"); */
 
-    t = G.TSP_vizinhosMaisProximos();
+    Tupla<int*, float> t = G.TSP_vizinhosMaisProximos();
 
     printf("Caminho vizinhos: %f\t\n",t.elem2);
     for(int i=0;i<5;i++){

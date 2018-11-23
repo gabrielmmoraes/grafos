@@ -124,6 +124,8 @@ class ListaAdjacencias : public Grafo
 
     int BFS(int origem);
     void DFS(int origem);
+
+    Tupla<int*, float> TSP_vizinhosMaisProximos();
     
     float* Dijkstra(int origem, int destino=-1);
     float* Prim(int origem);

@@ -665,7 +665,7 @@ Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
     int* caminho;
 
     // Iterador do caminho
-    int caminho_it = 0;
+    int iterador = 0;
 
     //Declaração do peso total, iniciado em 0
     float peso = 0;
@@ -699,7 +699,7 @@ Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
 
     // Insere o vértice 0 no caminho
     caminho[0] = 0;
-    caminho_it++;
+    iterador++;
 
     //Enquanto a fila não está vazia
     while(!Q.empty())
@@ -716,19 +716,25 @@ Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
         // Declara tupla temporária para inserção em heap
         Tupla<int, float> *t;
 
-        for(i = 0; i < n_vertices; i++){
+        for(i = 0; i < n_vertices; i++)
+        {    
             // Se o vértice i é vizinho não marcado do vértice atual
             if(adjacencias[verticeAtual][i]!=0 && vertices[i]->getMarcacao()==0){
+                
                 // Insere o vértice i na heap
                 t = (Tupla<int,float>*) malloc(sizeof(Tupla<int,float>));
+                
                 // Tupla recebe o índice do vértice
                 t->elem1 = i;
+                
                 // E a distância para o vértice atual
                 t->elem2 = adjacencias[verticeAtual][i];
+                
                 // Tupla adicionada na heap
                 h.insert(t);
             }
         }
+        
         // Se a heap está vazia, interrompe o loop já que não há vizinhos a visitar
         if(h.empty()) break;
 
@@ -742,12 +748,13 @@ Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
         Q.push(vizinhoMaisProximo);
         
         // Adiciona ao caminho
-        caminho[caminho_it] = vizinhoMaisProximo;
-        caminho_it++;
+        caminho[iterador] = vizinhoMaisProximo;
+        iterador++;
 
         // Adiciona peso da aresta entre vértice atual e vizinho mais próximo ao peso total
         peso+=h.getRoot()->elem2;
     }
+
     // Adiciona peso da aresta entre 0 e o último vértice do caminho ao peso total
     peso += adjacencias[0][caminho[n_vertices-1]];
 
@@ -1766,6 +1773,142 @@ void ListaAdjacencias::DFS(int origem)
 
     // Libera memória da listaTupla
     free(listaTupla);
+}
+
+Tupla<int*, float> ListaAdjacencias::TSP_vizinhosMaisProximos()
+{
+    // Declaração da tupla de retorno
+    Tupla<int*, float> retorno;
+
+    //Declaração do caminho
+    int* caminho;
+
+    // Iterador do caminho
+    int iterador = 0;
+
+    // Iterador da lista de adjacência
+    ListNode* pListaAdjacencias;
+
+    //Declaração do peso total, iniciado em 0
+    float peso = 0;
+
+    // Declaração de fila que será usada para selecionar próximo vértice
+    queue<int> Q;
+
+    // Variável que guarda o vértice sendo atualizado no momento
+    int verticeAtual;
+
+    // Variável que guarda o vizinho mais próximo do vértice atual
+    int vizinhoMaisProximo;
+
+    // Variável que guarda o vizinho sendo iterado na lista de adjacência
+    Tupla<int, float> verticeVizinho;
+
+    // Variável do for
+    int i;
+
+    //Desmarca todos os vértices
+    for (i = 0; i < n_vertices; i++)
+    {
+        vertices[i]->desmarca();
+    }
+
+    //Marca o vértice 0
+    vertices[0]->marca();
+
+    // Insere na fila
+    Q.push(0);
+
+    // Aloca memória para o caminho
+    caminho = (int*) malloc(sizeof(int)*n_vertices);
+
+    // Insere o vértice 0 no caminho
+    caminho[0] = 0;
+    iterador++;
+
+    //Enquanto a fila não está vazia
+    while(!Q.empty())
+    {
+        // Seleciona a cabeça da fila
+        verticeAtual = Q.front();
+
+        // Remove a cabeça da fila
+        Q.pop();
+
+        // Declara min heap para vizinhos do vértice atual
+        Heap h(n_vertices, false);
+
+        // Declara tupla temporária para inserção em heap
+        Tupla<int, float> *t;
+
+        // Apontando pListaAdjacencias para o início da lista de adjacência
+        pListaAdjacencias = adjacencias[verticeAtual]->getInicio();
+
+        // Percorrendo a lista de adjacência
+        while(pListaAdjacencias != NULL)
+        {
+            // Definindo vértice vizinho a ser analisado como índice guardado no elemento da lista de adjacência
+            // sendo apontado no momento
+            verticeVizinho = pListaAdjacencias->elemento;
+
+            // Se o vértice apontado por pListaAdjacencias não estiver marcado, continuar
+            if (vertices[verticeVizinho.elem1]->getMarcacao() == 0)
+            {
+                // Insere o vértice i na heap
+                t = (Tupla<int,float>*) malloc(sizeof(Tupla<int,float>));
+
+                // Tupla recebe índice do vértice vizinho
+                t->elem1 = verticeVizinho.elem1;
+
+                // Tupla recebe distância para o vértice vizinho
+                t->elem2 =verticeVizinho.elem2;
+
+                // Adiciona tupla na heap
+                h.insert(t);
+            }
+
+            // Define o ponteiro para o próximo vizinho a ser analizado
+            pListaAdjacencias = pListaAdjacencias->prox;
+        }
+
+        // Se a heap está vazia, interrompe o loop já que não há vizinhos a visitar
+        if(h.empty()) break;
+
+        // Seleciona vizinho mais próximo
+        vizinhoMaisProximo = h.getRoot()->elem1;
+    
+        // Marca vizinho mais próximo
+        vertices[vizinhoMaisProximo]->marca();
+    
+        // Adiciona a fila
+        Q.push(vizinhoMaisProximo);
+        
+        // Adiciona ao caminho
+        caminho[iterador] = vizinhoMaisProximo;
+        iterador++;
+
+        // Adiciona peso da aresta entre vértice atual e vizinho mais próximo ao peso total
+        peso += h.getRoot()->elem2;
+    }
+
+    pListaAdjacencias = adjacencias[0]->getInicio();
+    
+    while(pListaAdjacencias != NULL)
+    {
+        if(pListaAdjacencias->elemento.elem1 == caminho[n_vertices - 1])    break;
+
+        // Define o ponteiro para o próximo vizinho a ser analizado
+        pListaAdjacencias = pListaAdjacencias->prox;
+    }
+
+    // Adiciona peso da aresta entre 0 e o último vértice do caminho ao peso total
+    peso += pListaAdjacencias->elemento.elem2;
+
+	// Constroi tupla de retorno
+    retorno.elem1 = caminho;
+    retorno.elem2 = peso;
+
+    return retorno;
 }
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
