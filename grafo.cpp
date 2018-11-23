@@ -622,8 +622,10 @@ void MatrizAdjacencias::DFS(int origem)
     free(listaTupla);
 }
 
-// Encontra aproximação (PÉSSIMA) para problema do caixeiro viajante
-Tupla<int*, float> MatrizAdjacencias::TSP()
+// Encontra aproximação para problema do caixeiro viajante
+// visitando os vértices em ordem lexicográfica
+// Retorna uma tupla com o caminho e o peso total
+Tupla<int*, float> MatrizAdjacencias::TSP_lexicografico()
 {
     // Tupla de retorno da função
     Tupla<int*, float> t;
@@ -638,17 +640,122 @@ Tupla<int*, float> MatrizAdjacencias::TSP()
     caminho = (int*) malloc(sizeof(int)*n_vertices);
 
     // Define caminho
-    caminho[0] = n_vertices-1;
-    for (int i = 1;i < n_vertices; i++)
+    for (int i = 0;i < n_vertices; i++)
     {
-        caminho[i] = i-1;
+        caminho[i] = i;
         peso += adjacencias[i][i-1];
     }
 
+    // Constroi tupla de retorno
     t.elem1 = caminho;
     t.elem2 = peso;
 
     return t;
+}
+
+// Encontra aproximação para o problema do caixeiro viajante
+// visitando os vértices pelo vizinho mais próximo do último vértice adicionado ao caminho
+// Retorna uma tupla com o caminho e o peso total
+Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
+{
+    // Declaração da tupla de retorno
+    Tupla<int*, float> retorno;
+
+    //Declaração do caminho
+    int* caminho;
+
+    // Iterador do caminho
+    int caminho_it = 0;
+
+    //Declaração do peso total, iniciado em 0
+    float peso = 0;
+
+    // Declaração de fila que será usada para selecionar próximo vértice
+    queue<int> Q;
+
+    // Variável que guarda o vértice sendo atualizado no momento
+    int verticeAtual;
+
+    // Variável que guarda o vizinho mais próximo do vértice atual
+    int vizinhoMaisProximo;
+
+    // Variável do for
+    int i;
+
+    //Desmarca todos os vértices
+    for (i = 0; i < n_vertices; i++)
+    {
+        vertices[i]->desmarca();
+    }
+
+    //Marca o vértice 0
+    vertices[0]->marca();
+
+    // Insere na fila
+    Q.push(0);
+
+    // Aloca memória para o caminho
+    caminho = (int*) malloc(sizeof(int)*n_vertices);
+
+    // Insere o vértice 0 no caminho
+    caminho[0] = 0;
+    caminho_it++;
+
+    //Enquanto a fila não está vazia
+    while(!Q.empty())
+    {
+        // Seleciona a cabeça da fila
+        verticeAtual = Q.front();
+
+        // Remove a cabeça da fila
+        Q.pop();
+
+        // Declara min heap para vizinhos do vértice atual
+        Heap h(n_vertices, false);
+
+        // Declara tupla temporária para inserção em heap
+        Tupla<int, float> *t;
+
+        for(i = 0; i < n_vertices; i++){
+            // Se o vértice i é vizinho não marcado do vértice atual
+            if(adjacencias[verticeAtual][i]!=0 && vertices[i]->getMarcacao()==0){
+                // Insere o vértice i na heap
+                t = (Tupla<int,float>*) malloc(sizeof(Tupla<int,float>));
+                // Tupla recebe o índice do vértice
+                t->elem1 = i;
+                // E a distância para o vértice atual
+                t->elem2 = adjacencias[verticeAtual][i];
+                // Tupla adicionada na heap
+                h.insert(t);
+            }
+        }
+        // Se a heap está vazia, interrompe o loop já que não há vizinhos a visitar
+        if(h.empty()) break;
+
+        // Seleciona vizinho mais próximo
+        vizinhoMaisProximo = h.getRoot()->elem1;
+
+        // Marca vizinho mais próximo
+        vertices[vizinhoMaisProximo]->marca();
+
+        // Adiciona a fila
+        Q.push(vizinhoMaisProximo);
+        
+        // Adiciona ao caminho
+        caminho[caminho_it] = vizinhoMaisProximo;
+        caminho_it++;
+
+        // Adiciona peso da aresta entre vértice atual e vizinho mais próximo ao peso total
+        peso+=h.getRoot()->elem2;
+    }
+    // Adiciona peso da aresta entre 0 e o último vértice do caminho ao peso total
+    peso += adjacencias[0][caminho[n_vertices-1]];
+
+    // Constroi tupla de retorno
+    retorno.elem1 = caminho;
+    retorno.elem2 = peso;
+
+    return retorno;
 }
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos

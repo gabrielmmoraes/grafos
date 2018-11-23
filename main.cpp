@@ -12,12 +12,21 @@ int main(){
 
     MatrizAdjacencias G(pFileIn);
 
-    Tupla<int*, float> t = G.TSP();
+    Tupla<int*, float> t = G.TSP_lexicografico();
 
-    printf("Caminho: %f\t\n",t.elem2);
+    printf("Caminho léxico: %f\t\n",t.elem2);
     for(int i=0;i<5;i++){
         printf("%d; ",t.elem1[i]+1);
     }
-    printf("\n");
+    printf("\n\n");
+
+    t = G.TSP_vizinhosMaisProximos();
+
+    printf("Caminho vizinhos: %f\t\n",t.elem2);
+    for(int i=0;i<5;i++){
+        printf("%d; ",t.elem1[i]+1);
+    }
+    printf("\n\n");
+
     return 0;
 }
