@@ -7,26 +7,27 @@ using namespace std;
 int main(){
 
     FILE* pFileIn;
+    FILE* pFileOut;
 
-    pFileIn = fopen("points-5.txt","r");
+    Tupla<int*, float> t;
 
-    ListaAdjacencias G(pFileIn);
+    int n;
 
-    /* Tupla<int*, float> t = G.TSP_lexicografico();
+    pFileIn = fopen("points-10000.txt","r");
+    pFileOut = fopen("resultadosTSP.txt","a");
 
-    printf("Caminho léxico: %f\t\n",t.elem2);
-    for(int i=0;i<5;i++){
-        printf("%d; ",t.elem1[i]+1);
+    n = 10000;
+
+    MatrizAdjacencias G(pFileIn);
+
+    t = G.TSP_vizinhosMaisProximos();
+
+    fprintf(pFileOut, "Caminho %d pontos: %f\t\n",n,t.elem2);
+    for(int i=0;i<n;i++){
+        fprintf(pFileOut, "%d ",t.elem1[i]+1);
     }
-    printf("\n\n"); */
+    fprintf(pFileOut, "\n\n");
 
-    Tupla<int*, float> t = G.TSP_vizinhosMaisProximos();
-
-    printf("Caminho vizinhos: %f\t\n",t.elem2);
-    for(int i=0;i<5;i++){
-        printf("%d; ",t.elem1[i]+1);
-    }
-    printf("\n\n");
-
+    free(t.elem1);
     return 0;
 }
