@@ -89,6 +89,7 @@ class MatrizAdjacencias : public Grafo
 
     Tupla<int*, float> TSP_lexicografico();
     Tupla<int*, float> TSP_vizinhosMaisProximos();
+    Tupla<int*, float> TSP_dinamica();
 
     float* Dijkstra(int origem, int destino=-1);
     float* Prim(int origem);

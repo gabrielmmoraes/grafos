@@ -15,7 +15,11 @@ struct greater1{
   bool operator()(Tupla<num1, num2>& a,Tupla<num1, num2>& b) const{
     return a>b;
   }
-}; 
+};
+
+bool ispowerof2(unsigned int x) {
+   return x && !(x & (x - 1));
+}
 
 // Inicializa um vértice
 Vertice::Vertice(float x, float y)
@@ -763,6 +767,152 @@ Tupla<int*, float> MatrizAdjacencias::TSP_vizinhosMaisProximos()
     retorno.elem2 = peso;
 
     return retorno;
+}
+
+// Encontra solução ótima para problema do caixeiro viajante
+// por programação dinâmica
+Tupla<int*, float> MatrizAdjacencias::TSP_dinamica()
+{
+    // Declaração de tupla de retorno
+    Tupla<int*, float> t;
+
+    // Declaração e alocação do caminho
+    int** caminho = (int**) malloc(sizeof(int*)*n_vertices);
+
+    // Iterador do caminho
+    int iterador;
+
+    // Declaração do peso total
+    float* peso = (float*) malloc(sizeof(float)*n_vertices);
+
+    // Declaração das variáveis do loop
+    int i, j, k;
+
+    // Declaração da varíavel que codifica o vértice que será inserido no conjunto de visitados
+    int mask;
+
+    // Declaração e alocação da matriz para programação dinâmica
+    float** M = (float**) malloc(sizeof(float*)*(1<<n_vertices));
+    for (i = 0; i < 1<<n_vertices; i++)
+    {
+        M[i] = (float*) malloc(sizeof(float)*n_vertices);
+    }
+
+    // Primeira linha da matriz inicializada com 0
+    for(j = 0; j < n_vertices; j++)
+    {
+        M[0][j] = 0;
+
+        // Inicia vetores de caminho
+        caminho[j] = (int*) malloc(sizeof(int)*n_vertices);
+    }
+
+    // Para toda linha da matriz
+    for(i = 1; i < 1<<n_vertices; i++){
+        // Para toda coluna da matriz
+        for(j = 0; j < n_vertices; j++){
+            
+            // Inicializa a posição como infinito
+            M[i][j] = INFINITY;
+            
+            // Se o vértice j ainda não está no conjunto de vértices visitados codificado em i 
+            if(~i&(1<<j)){
+
+                // Para toda máscara menor que i
+                for(k = 0; k <= log2(i) ;k++){
+                    mask = 1<<k;
+
+                    // Se a máscara está contida em i e j e k não representam o mesmo vértice
+                    if(mask&i && adjacencias[j][k]!=0){
+                        // Redefine a posição na matriz para o mínimo entre o último valor definido
+                        // e o valor do conjunto sem o vértice j mais o peso da aresta entre k e j
+                        M[i][j] =min(M[i][j], M[i^mask][k] + adjacencias[j][k]);
+                    }
+                }   
+            }
+        }
+    }
+    // Encontrando os caminhos
+
+    // Declaração de uma varíavel para identificação do caminho
+    int caminhoID;
+
+    // Para cada caminho
+    for(caminhoID=0;caminhoID<n_vertices;caminhoID++){
+
+        // Inicializa j como a a identificação do caminho
+        j = caminhoID;
+
+        // Inicializa iterador
+        iterador = n_vertices-1;
+
+        // Adiciona j ao final do caminho
+        caminho[j][iterador] = j;
+        iterador--;
+
+        // Redefine i como o conjunto com todos os vértices menos j
+        i = (1<<n_vertices) - 1;
+        i = i^(1<<j);
+
+        // Até que a linha seja uma potência de 2 (representando um conjunto de um vértice só)
+        while(!ispowerof2(i)){
+
+            // Para toda máscara menor que i
+            for(k = 0;k<log2(i);k++){
+                mask = 1<<k;
+
+                // Se a máscara está contida em i e o valor da posição atual é igual
+                // ao valor do conjunto sem o vértice j mais o peso da aresta entre k e j
+                if(k!=j && mask&i && M[i][j] == M[i^mask][k] + adjacencias[j][k]){
+
+                    // Redefine i como a linha representando o conjunto sem o vértice j 
+                    i = i^mask;
+
+                    // Redefine j como a coluna do vértice k
+                    j = k;
+
+                    // Adiciona o vértice k ao caminho
+                    caminho[caminhoID][iterador] = j;
+                    iterador--;
+
+                    // Interrompe o loop interno
+                    break;
+                }
+            }
+        }
+
+        int primeiro_vertice = (int)log2(i);
+
+        // Adiciona primeiro vértice ao caminho
+        caminho[caminhoID][iterador] = primeiro_vertice;
+
+        // Redefine i
+        i = (1<<n_vertices) - 1;
+        i = i^(1<<caminhoID);
+
+        // Soma ao peso co conjunto com todos os vértices adicionados 
+        // o peso da aresta entre o primeiro e o último vértice do caminho
+        M[(1<<n_vertices)-1][caminhoID] = M[i][caminhoID] + adjacencias[caminhoID][primeiro_vertice];
+        peso[caminhoID] = M[(1<<n_vertices)-1][caminhoID];
+    }
+
+    // Seleciona o caminho ótimo
+    caminhoID = 0;
+    for(i=0;i<n_vertices;i++){
+        if(peso[i]<peso[caminhoID]) caminhoID = i;
+    }
+
+    // Constroi tupla de retorno
+    t.elem1 = caminho[caminhoID];
+    t.elem2 = peso[caminhoID];
+
+    // Libera memória
+    free(M);
+    free(peso);
+    for(i=0;i<n_vertices;i++) if(i!=caminhoID) free(caminho[i]);
+    free(caminho);
+
+    return t;
 }
 
 // Algoritmo de caminho mínimo entre origem e destino em grafos com pesos
