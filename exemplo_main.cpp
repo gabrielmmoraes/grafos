@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
-#include "grafo.h"
-#include "tupla.h"
+#include "src/grafo.h"
+#include "src/tupla.h"
 #include <ctime>
 #include <chrono>
 
@@ -19,25 +19,25 @@ int main(){
     chrono::high_resolution_clock::time_point inicio, fim;
     chrono::duration<double> duracao;
 
-    pFileIn = fopen("grafo_1.txt", "r");
-    pFileOut = fopen("resultados_grafo_1_matriz.txt", "w");
-    MST = fopen("MST_grafo_1.txt", "w");
+    pFileIn = fopen("grafo_2.txt", "r");
+    pFileOut = fopen("resultados_grafo_2_matriz.txt", "w");
+    MST = fopen("MST_grafo_2.txt", "w");
 
     inicio = chrono::high_resolution_clock::now();
-    MatrizAdjacencias G(pFileIn, true);
+    ListaAdjacencias G(pFileIn, true);
     fim = chrono::high_resolution_clock::now();
     duracao = chrono::duration_cast<chrono::duration<double>>(fim-inicio);
     fprintf(pFileOut, "Tempo construtor: %lf ms\n\n", duracao);
 
     for (int j = 9; j <= 49; j+=10){
 
-        Tupla<int*,float> gosto = G.CaminhoMinimo(0,j);
+        Tupla<int*,float> tupla = G.CaminhoMinimo(0,j);
 
-        fprintf(pFileOut, "Distância até %d: %.3f\n",j+1, gosto.elem2);
+        fprintf(pFileOut, "Distância até %d: %.3f\n",j+1, tupla.elem2);
 
         fprintf(pFileOut, "Caminho: ");
-        for(int i = 1; i<=gosto.elem1[0];i++){
-            fprintf(pFileOut, "(%d) ",gosto.elem1[i]+1);
+        for(int i = 1; i<=tupla.elem1[0];i++){
+            fprintf(pFileOut, "(%d) ",tupla.elem1[i]+1);
         }
         fprintf(pFileOut, "\n");
 
@@ -64,10 +64,10 @@ int main(){
 
     fprintf(pFileOut, "Tempo MST: %lf ms\n\n", duracao);
 
-    inicio = chrono::high_resolution_clock::now();
+    /* inicio = chrono::high_resolution_clock::now();
     float distmed = G.DistanciaMedia();
     fim = chrono::high_resolution_clock::now();
     duracao = chrono::duration_cast<chrono::duration<double>>(fim-inicio);
     fprintf(pFileOut, "Distância média: %.3f\n", distmed);
-    fprintf(pFileOut, "Tempo distância média: %lf ms\n", duracao);
+    fprintf(pFileOut, "Tempo distância média: %lf ms\n", duracao); */
 }
